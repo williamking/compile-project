@@ -42,7 +42,8 @@ class Token {
     public int row;
     public int col;
     //在文本的行列位置
-}
+    public int position;
+};
 
 class Tokenizer {
     Tokenizer(String fileName);
@@ -61,4 +62,4 @@ class Tokenizer {
     //将当前提取的token字符串包装成真正的Token(词法分析使用)
     public boolean isEnd();
     //判断文本是否提取到末尾
-}
+};
