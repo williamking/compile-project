@@ -42,26 +42,28 @@ class Parser {
     //这是一个实现的例子
     public void create_stmt();
     //创建View的语句,创建一条新View
-    public void view_stmt();    
+    public void view_stmt(String name);    
+    //传入参数为创建的View名称
     public void output_stmt();
     public String alias();
     //返回别名
     public map<String, String> alias();
     //返回View和其别名的绑定
-    public void select_stmt();
-    //从已有的View中选择列插入到创建的新View中(前面的create)
-    public map<String, vector<String>> select_list();
+    public void select_stmt(String name);
+    //从已有的View中选择列插入到创建的新View中(参数为操作的View的名称)
+    public map<String, pair<String,String>> select_list();
     //返回要组成新View的内容的多个列和其别名组成的map
-    public pair<String, vector<String>> select_item();
-    //返回查询的列和其别名组成的pair
+    //map的key为选择的列并入到新View中的列名,value为选择的View别名和其列名组成的pair
+    public pair<String, pair<String, String>> select_item();
+    //返回select_list中map的一个value
     public map<String, String> from_list();
     //返回View名和其别名组成的map
     public pair<String, String> from_item();
     //返回View名和其别名组成的pair
-    public void extract_stmt();
-    //执行正则匹配操作,并将结果赋予新View
-    public void extract_spec();
-    public void regex_spec();
+    public void extract_stmt(String name);
+    //执行正则匹配操作,并将结果赋予新View,参数为View的名称
+    public void extract_spec(vector<String> &regexps, );
+    public void regex_spec(String &regexp, String &viewName, String &colName, map<int, String> nameSpec);
     public pair<String, String> column();
     //返回来源View的别名以及其列名
     public map<int, String> name_spec();
