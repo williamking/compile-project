@@ -72,10 +72,10 @@ class Parser {
     //返回列号与列名的map
     public pair<int, String> single_group();
     //返回新View列号与操作的新View的列名的pair
-    public void pattern_spec();
+    public PatternMatcher pattern_spec();
     public void pattern_expr();
     public void pattern_pkg();
-    public void atom();
+    public Atom atom();
     public void pattern_group();
     //以上的函数均为非终结符的匹配函数
 
