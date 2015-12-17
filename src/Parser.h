@@ -107,4 +107,4 @@ class Parser {
     public void pattern_group();
     //以上的函数均为非终结符的匹配函数
 
-}
+};

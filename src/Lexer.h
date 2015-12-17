@@ -14,4 +14,4 @@ class Lexer {
     //向前看的token
     void move();
     //向下读取一个token
-}
+};
