@@ -13,4 +13,4 @@ class View {
     //往列中插入元素
     public output();
     //输出View
-}
+};
