@@ -1,0 +1,728 @@
+create
+Token row: 1
+Token col: 8
+view
+Token row: 1
+Token col: 13
+Cap
+Token row: 1
+Token col: 17
+as
+Token row: 2
+Token col: 0
+
+
+Token row: 2
+Token col: 0
+extract
+Token row: 2
+Token col: 10
+regex
+Token row: 2
+Token col: 16
+[A-Z][a-z]*
+Token row: 2
+Token col: 29
+
+
+Token row: 3
+Token col: 0
+on
+Token row: 3
+Token col: 7
+D
+Token row: 3
+Token col: 9
+.
+Token row: 3
+Token col: 9
+text
+Token row: 3
+Token col: 14
+as
+Token row: 3
+Token col: 17
+Cap
+Token row: 4
+Token col: 0
+
+
+Token row: 4
+Token col: 0
+from
+Token row: 4
+Token col: 7
+Document
+Token row: 4
+Token col: 16
+D
+Token row: 4
+Token col: 18
+;
+Token row: 4
+Token col: 18
+
+
+Token row: 5
+Token col: 0
+
+
+Token row: 6
+Token col: 0
+create
+Token row: 6
+Token col: 7
+view
+Token row: 6
+Token col: 12
+Stt
+Token row: 6
+Token col: 16
+as
+Token row: 7
+Token col: 0
+
+
+Token row: 7
+Token col: 0
+extract
+Token row: 7
+Token col: 10
+regex
+Token row: 7
+Token col: 16
+Washington|Georgia|Virginia
+Token row: 7
+Token col: 45
+
+
+Token row: 8
+Token col: 0
+on
+Token row: 8
+Token col: 7
+D
+Token row: 8
+Token col: 9
+.
+Token row: 8
+Token col: 9
+text
+Token row: 9
+Token col: 0
+
+
+Token row: 9
+Token col: 0
+return
+Token row: 9
+Token col: 11
+group
+Token row: 9
+Token col: 17
+0
+Token row: 9
+Token col: 19
+as
+Token row: 9
+Token col: 22
+Stt
+Token row: 10
+Token col: 0
+
+
+Token row: 10
+Token col: 0
+from
+Token row: 10
+Token col: 7
+Document
+Token row: 10
+Token col: 16
+D
+Token row: 10
+Token col: 18
+;
+Token row: 10
+Token col: 18
+
+
+Token row: 11
+Token col: 0
+
+
+Token row: 12
+Token col: 0
+create
+Token row: 12
+Token col: 7
+view
+Token row: 12
+Token col: 12
+Loc
+Token row: 12
+Token col: 16
+as
+Token row: 13
+Token col: 0
+
+
+Token row: 13
+Token col: 0
+extract
+Token row: 13
+Token col: 10
+pattern
+Token row: 13
+Token col: 18
+(
+Token row: 13
+Token col: 19
+<
+Token row: 13
+Token col: 20
+C
+Token row: 13
+Token col: 22
+.
+Token row: 13
+Token col: 22
+Cap
+Token row: 13
+Token col: 26
+>
+Token row: 13
+Token col: 26
+)
+Token row: 13
+Token col: 27
+,
+Token row: 13
+Token col: 31
+(
+Token row: 13
+Token col: 33
+<
+Token row: 13
+Token col: 34
+S
+Token row: 13
+Token col: 36
+.
+Token row: 13
+Token col: 36
+Stt
+Token row: 13
+Token col: 40
+>
+Token row: 13
+Token col: 40
+)
+Token row: 13
+Token col: 41
+
+
+Token row: 14
+Token col: 0
+return
+Token row: 14
+Token col: 9
+group
+Token row: 14
+Token col: 15
+0
+Token row: 14
+Token col: 17
+as
+Token row: 14
+Token col: 20
+Loc
+Token row: 15
+Token col: 0
+
+
+Token row: 15
+Token col: 0
+and
+Token row: 15
+Token col: 8
+group
+Token row: 15
+Token col: 14
+1
+Token row: 15
+Token col: 16
+as
+Token row: 15
+Token col: 19
+Cap
+Token row: 16
+Token col: 0
+
+
+Token row: 16
+Token col: 0
+and
+Token row: 16
+Token col: 8
+group
+Token row: 16
+Token col: 14
+2
+Token row: 16
+Token col: 16
+as
+Token row: 16
+Token col: 19
+Stt
+Token row: 17
+Token col: 0
+
+
+Token row: 17
+Token col: 0
+from
+Token row: 17
+Token col: 7
+Cap
+Token row: 17
+Token col: 11
+C
+Token row: 17
+Token col: 13
+,
+Token row: 17
+Token col: 13
+Stt
+Token row: 17
+Token col: 18
+S
+Token row: 17
+Token col: 20
+;
+Token row: 17
+Token col: 20
+
+
+Token row: 18
+Token col: 0
+
+
+Token row: 19
+Token col: 0
+create
+Token row: 19
+Token col: 7
+view
+Token row: 19
+Token col: 12
+Per
+Token row: 19
+Token col: 16
+as
+Token row: 20
+Token col: 0
+
+
+Token row: 20
+Token col: 0
+extract
+Token row: 20
+Token col: 10
+regex
+Token row: 20
+Token col: 16
+[A-Z][a-z]*
+Token row: 20
+Token col: 29
+
+
+Token row: 21
+Token col: 0
+on
+Token row: 21
+Token col: 7
+D
+Token row: 21
+Token col: 9
+.
+Token row: 21
+Token col: 9
+text
+Token row: 22
+Token col: 0
+
+
+Token row: 22
+Token col: 0
+return
+Token row: 22
+Token col: 11
+group
+Token row: 22
+Token col: 17
+0
+Token row: 22
+Token col: 19
+as
+Token row: 22
+Token col: 22
+Per
+Token row: 23
+Token col: 0
+
+
+Token row: 23
+Token col: 0
+from
+Token row: 23
+Token col: 7
+Document
+Token row: 23
+Token col: 16
+D
+Token row: 23
+Token col: 18
+;
+Token row: 23
+Token col: 18
+
+
+Token row: 24
+Token col: 0
+
+
+Token row: 25
+Token col: 0
+create
+Token row: 25
+Token col: 7
+view
+Token row: 25
+Token col: 12
+PerLoc
+Token row: 25
+Token col: 19
+as
+Token row: 26
+Token col: 0
+
+
+Token row: 26
+Token col: 0
+extract
+Token row: 26
+Token col: 10
+pattern
+Token row: 26
+Token col: 18
+(
+Token row: 26
+Token col: 19
+<
+Token row: 26
+Token col: 20
+P
+Token row: 26
+Token col: 22
+.
+Token row: 26
+Token col: 22
+Per
+Token row: 26
+Token col: 26
+>
+Token row: 26
+Token col: 26
+)
+Token row: 26
+Token col: 27
+<
+Token row: 26
+Token col: 29
+token
+Token row: 26
+Token col: 35
+>
+Token row: 26
+Token col: 35
+{
+Token row: 26
+Token col: 36
+1
+Token row: 26
+Token col: 38
+,
+Token row: 26
+Token col: 38
+2
+Token row: 26
+Token col: 40
+}
+Token row: 26
+Token col: 40
+(
+Token row: 26
+Token col: 42
+<
+Token row: 26
+Token col: 43
+L
+Token row: 26
+Token col: 45
+.
+Token row: 26
+Token col: 45
+Loc
+Token row: 26
+Token col: 49
+>
+Token row: 26
+Token col: 49
+)
+Token row: 26
+Token col: 50
+
+
+Token row: 27
+Token col: 0
+return
+Token row: 27
+Token col: 9
+group
+Token row: 27
+Token col: 15
+0
+Token row: 27
+Token col: 17
+as
+Token row: 27
+Token col: 20
+PerLoc
+Token row: 28
+Token col: 0
+
+
+Token row: 28
+Token col: 0
+and
+Token row: 28
+Token col: 8
+group
+Token row: 28
+Token col: 14
+1
+Token row: 28
+Token col: 16
+as
+Token row: 28
+Token col: 19
+Per
+Token row: 29
+Token col: 0
+
+
+Token row: 29
+Token col: 0
+and
+Token row: 29
+Token col: 8
+group
+Token row: 29
+Token col: 14
+2
+Token row: 29
+Token col: 16
+as
+Token row: 29
+Token col: 19
+Loc
+Token row: 30
+Token col: 0
+
+
+Token row: 30
+Token col: 0
+from
+Token row: 30
+Token col: 7
+Per
+Token row: 30
+Token col: 11
+P
+Token row: 30
+Token col: 13
+,
+Token row: 30
+Token col: 13
+Loc
+Token row: 30
+Token col: 18
+L
+Token row: 30
+Token col: 20
+;
+Token row: 30
+Token col: 20
+
+
+Token row: 31
+Token col: 0
+
+
+Token row: 32
+Token col: 0
+create
+Token row: 32
+Token col: 7
+view
+Token row: 32
+Token col: 12
+PerLocOnly
+Token row: 32
+Token col: 23
+as
+Token row: 33
+Token col: 0
+
+
+Token row: 33
+Token col: 0
+select
+Token row: 33
+Token col: 9
+PL
+Token row: 33
+Token col: 12
+.
+Token row: 33
+Token col: 12
+PerLoc
+Token row: 33
+Token col: 19
+as
+Token row: 33
+Token col: 22
+PerLoc
+Token row: 34
+Token col: 0
+
+
+Token row: 34
+Token col: 0
+from
+Token row: 34
+Token col: 7
+PerLoc
+Token row: 34
+Token col: 14
+PL
+Token row: 34
+Token col: 17
+;
+Token row: 34
+Token col: 17
+
+
+Token row: 35
+Token col: 0
+
+
+Token row: 36
+Token col: 0
+output
+Token row: 36
+Token col: 7
+view
+Token row: 36
+Token col: 12
+Cap
+Token row: 36
+Token col: 16
+;
+Token row: 36
+Token col: 16
+
+
+Token row: 37
+Token col: 0
+output
+Token row: 37
+Token col: 7
+view
+Token row: 37
+Token col: 12
+Stt
+Token row: 37
+Token col: 16
+;
+Token row: 37
+Token col: 16
+
+
+Token row: 38
+Token col: 0
+output
+Token row: 38
+Token col: 7
+view
+Token row: 38
+Token col: 12
+Loc
+Token row: 38
+Token col: 16
+;
+Token row: 38
+Token col: 16
+
+
+Token row: 39
+Token col: 0
+output
+Token row: 39
+Token col: 7
+view
+Token row: 39
+Token col: 12
+Per
+Token row: 39
+Token col: 16
+;
+Token row: 39
+Token col: 16
+
+
+Token row: 40
+Token col: 0
+output
+Token row: 40
+Token col: 7
+view
+Token row: 40
+Token col: 12
+PerLoc
+Token row: 40
+Token col: 19
+;
+Token row: 40
+Token col: 19
+
+
+Token row: 41
+Token col: 0
+output
+Token row: 41
+Token col: 7
+view
+Token row: 41
+Token col: 12
+PerLocOnly
+Token row: 41
+Token col: 23
+;
+Token row: 41
+Token col: 23
+
+
+Token row: 42
+Token col: 0

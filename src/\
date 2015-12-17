@@ -67,15 +67,12 @@ class Parser {
     //返回View名和其别名组成的pair
     public void extract_stmt(String name) {
         boolean flag = 0;
-        String regexp;
-
         if (lexer.ahead.type == REGEX)
             regex_spec();
             flag = 0;
         else
             if (lexer.ahead.type == PATTERN)
                 pattern_spec();
-                flag = 1;
             else {
                 error();
                 return;
@@ -85,9 +82,7 @@ class Parser {
         }
         move();
         map<String, String> viewList = from_list();
-        if (!flag) {
 
-        }
     }
     //执行正则匹配操作,并将结果赋予新View,参数为View的名称
     public void extract_spec(vector<String> &regexps, );
