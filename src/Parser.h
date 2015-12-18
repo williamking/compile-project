@@ -4,6 +4,7 @@
 #include <Tokenizer.h>
 #include <Executer.h>
 #include <utility>
+#include <regex.h>
 
 using namespace std;
 
@@ -13,6 +14,7 @@ class Parser {
     //构造函数,参数为AQL文件名和处理文本文件名
     private Tokenizer textTokenizer;
     //源文本分析器
+    private string textString;
     private vector<View> views;
     //保存所有创建的View
     private map<String, int> viewIndex;
@@ -67,31 +69,44 @@ class Parser {
     //返回View名和其别名组成的pair
     public void extract_stmt(String name) {
         boolean flag = 0;
-        String regexp;
+        string viewName;
+        string regexp;
+        string colName;
+        map<int, string> nameSpec;
 
-        if (lexer.ahead.type == REGEX)
-            regex_spec();
+        if (lexer.ahead.type == REGEX) {
+            regex_spec(regexp, viewName, colName, nameSpec);
             flag = 0;
-        else
-            if (lexer.ahead.type == PATTERN)
+        } else {
+            if (lexer.ahead.type == PATTERN) {
                 pattern_spec();
                 flag = 1;
+            }
             else {
                 error();
                 return;
             }
+        }
         if (lexer.ahead.type != from) {
             error();
         }
         move();
-        map<String, String> viewList = from_list();
+        map<string, string> fromList = from_list();
         if (!flag) {
-
+            View &view = views[viewIndex[viewName]];
+            View &fromView = views[viewIndex[fromList[viewName]]];
+            vector<string> col = fromView.groups[fromView.colIndex[colName]];
+            vector<vector<int>> spans = (regexp.c_str(), textString.c_str());
+            view.createGroup(namespec[0]);
+            for (int i = 0; i < spans.size(); ++i) {
+                Token token = new Token(textString.substr(spans[i][0], spans[i][1] - spans[i][0]), 0, 0, spans[i][0]);  
+                view.insert(namespec[0], token);
+            }
         }
     }
     //执行正则匹配操作,并将结果赋予新View,参数为View的名称
     public void extract_spec(vector<String> &regexps, );
-    public void regex_spec(String &regexp, String &viewName, String &colName, map<int, String> nameSpec);
+    public void regex_spec(String &regexp, String &viewName, String &colName, map<int, string> &nameSpec);
     public pair<String, String> column();
     //返回来源View的别名以及其列名
     public map<int, String> name_spec();
