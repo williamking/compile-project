@@ -122,45 +122,13 @@ class Parser {
             error();
             return;
         } 
-        move();
         pair<string, string> source = column();
         viewName = source.first;
         colName = source.second; 
-        nameSpec = name_spec();
     }
-    public pair<string, string> column() {
-        if (lexer.ahead.type != ID) {
-            error();
-            exit(0);
-        }
-        string viewName = lexer.ahead.content; 
-        move();
-        if (lexer.ahead.type != DOT) {
-            error();
-            exit(0);
-        }
-        if (lexer.ahead.type != ID) {
-            error();
-             return;
-        }
-        string colName = lexer.ahead.
-        move();
-        return make_pair(viewName, colName);
-    }
+    public pair<String, String> column();
     //返回来源View的别名以及其列名
-    public map<int, string> name_spec() {
-        if (lexer.ahead.type == AS) {
-            move();
-            if (lexer.ahead.type != ID) {
-                error();
-            }
-            map<int, string> nameSpec;
-            nameSpec[0] = lexer.ahead.content;
-            move(); 
-            return nameSpec;
-        }
-         
-    }
+    public map<int, String> name_spec();
     //若是为as ID,则返回只有一个pair<0, ID>的map,否则返回 group_spec
     public map<int, String> group_spec();
     //返回列号与列名的map
