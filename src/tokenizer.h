@@ -34,7 +34,8 @@ enum TYPE {
     BRACKETLEFT = '<', //左尖括号
     BRACKETRIGHT = '>', //右尖括号
     BRACESLEFT = '{', //左大括号
-    BRACESRIGHT = '}' //右大括号
+    BRACESRIGHT = '}', //右大括号
+    END
 };
 
 class Token {
