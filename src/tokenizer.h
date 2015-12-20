@@ -1,6 +1,10 @@
+#ifndef TOKENIZER_H
+#define TOKENIZER_H
+
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <cstdlib>
 
 #include <iostream>
 #include <fstream>
@@ -34,15 +38,12 @@ enum TYPE {
     BRACKETLEFT = '<', //左尖括号
     BRACKETRIGHT = '>', //右尖括号
     BRACESLEFT = '{', //左大括号
-    BRACESRIGHT = '}', //右大括号
-    END
+    BRACESRIGHT = '}' //右大括号
 };
 
 class Token {
     public:
-        Token() {
-
-        };
+        Token() {}
         Token(string str, TYPE type, int row, int col) {
             content = str;
             this->type = type;
@@ -63,8 +64,16 @@ class Token {
 
 class Tokenizer {
 public:
+    Tokenizer() {}
+    ~Tokenizer() {}
     Tokenizer(string fileName) {
         fileStream.open(fileName.c_str(), ifstream::in);
+        if (!fileStream) {
+            cerr << "Sorry, No such file ~" << endl;
+            exit(0);
+        } else {
+            cerr << "Open file succeed!" << endl;
+        }
 
         std::string str;
         tokenString = "";
@@ -81,35 +90,49 @@ public:
     //构造函数,参数为文件名
 
     void readch() {
-        if (tokenString.size() > current) 
+        if (tokenString.size() > current) {
             peek = tokenString[current++];
-        else
-            peek = EOF;     // flag end 
-        col++;
-        if (peek == '\n') {
-            row++;
-            col = 0;
+            if (peek == '\n') {
+                row++;
+                col = 1;
+            } else {
+                col++;
+            }
+        }
+        else {
+            peek = EOF;     // flag end
+            exit(0);
         }
     }
 
     Token getToken() {
-        while (isblank(peek)) {
+        while (isblank(peek) || peek == '\n') {
             readch();
         }
+
+        int tok_col = col - 1;
+        int tok_row = row;
 
         if (isalpha(peek)) {
             std::string s = "";
             do {
-                s.append(1u, peek); readch();
+                s.append(1u, peek);
+                readch();
             } while (isalpha(peek));
-            return Token(s, ID, row, col);
+            if (peek == '\n') {
+                tok_row = row - 1;
+            }
+            return Token(s, ID, tok_row, tok_col);
         }
         if (isdigit(peek)) {
             std::string s = "";
             do {
                 s.append(1u, peek); readch();
             } while (isdigit(peek));
-            return Token(s, NUM, row, col);
+            if (peek == '\n') {
+                tok_row = row - 1;
+            }
+            return Token(s, NUM, tok_row, tok_col);
         }
         if (peek == '/') {
             std::string regex = "";
@@ -123,11 +146,15 @@ public:
                 }
                 readch();
             }
-            Token tok = Token(regex, REG, row, col); peek = ' ';
+            if (peek == '\n') {
+                tok_row = row - 1;
+            }
+            Token tok = Token(regex, REG, tok_row, tok_col); peek = ' ';
             return tok;
         }
         // other case
-        Token tok = Token(string(1, peek), (TYPE)peek, row, col); peek = ' ';
+        Token tok = Token(string(1, peek), (TYPE)peek, tok_row, tok_col);
+        peek = ' ';
         return tok;
     }
 
@@ -156,3 +183,5 @@ public:
         char peek;
     // top char
 };
+
+#endif
