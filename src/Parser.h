@@ -30,9 +30,7 @@ class Parser {
     //保存所有创建的View
     private map<String, int> viewIndex;
     //View与其名称的绑定
-    //private Lexer lexer;
-    private Tokenizer programTokenizer;
-    //词法分析器
+    private Lexer lexer;
     
     public createView(String name) {
         views.push_back(new View());

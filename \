@@ -122,20 +122,9 @@ public:
             if (peek == '\n') {
                 tok_row = row - 1;
             }
-            if (s == "create") return Token(s, CREATE, tok_row, tok_col);
-            if (s == "view") return Token(s, VIEW, tok_row, tok_col);
-            if (s == "as") return Token(s, AS, tok_row, tok_col);
-            if (s == "output") return Token(s, OUTPUT, tok_row, tok_col);
-            if (s == "select") return Token(s, SELECT, tok_row, tok_col);
-            if (s == "from") return Token(s, FROM, tok_row, tok_col);
-            if (s == "extract") return Token(s, EXTRACT, tok_row, tok_col);
-            if (s == "regex") return Token(s, REGEX, tok_row, tok_col);
-            if (s == "on") return Token(s, ON, tok_row, tok_col);
-            if (s == "return") return Token(s, RETURN, tok_row, tok_col);
-            if (s == "group") return Token(s, GROUP, tok_row, tok_col);
-            if (s == "and") return Token(s, AND, tok_row, tok_col);
-            if (s == "Token") return Token(s, TOKEN, tok_row, tok_col);
-            if (s == "pattern") return Token(s, PATTERN, tok_row, tok_col);
+            switch (s) {
+               case "create": 
+            }
             return Token(s, ID, tok_row, tok_col);
         }
         if (isdigit(peek)) {
