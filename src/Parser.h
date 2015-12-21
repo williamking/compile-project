@@ -1,11 +1,11 @@
 #include "Lexer.h"
-#include <iostream.h>
-#include <View.h>
-#include <Tokenizer.h>
-#include <Executer.h>
+#include <iostream>
+#include "View.h"
+#include "Tokenizer.h"
+//#include <>Executer.h>
 #include <utility>
-#include <regex.h>
-#include <sstring>
+#include "regex.cpp"
+#include <sstream>
 #include <PatternMatcher>
 
 using namespace std;
@@ -30,9 +30,7 @@ class Parser {
     //保存所有创建的View
     private map<String, int> viewIndex;
     //View与其名称的绑定
-    //private Lexer lexer;
-    private Tokenizer programTokenizer;
-    //词法分析器
+    private Lexer lexer;
     
     public createView(String name) {
         views.push_back(new View());
@@ -47,14 +45,14 @@ class Parser {
     //语法分析错误时的处理
 
     public void exec() {
-        while (lexer.ahead.type != END) aql_stmt();
+        while (lexer.getAheadToken().type != END) aql_stmt();
         for (int i = 0; i < views.size(); ++i) {
             views[i].output();
         }
     }
     //执行文本中一条AQL语句
     public void aql_stmt() {
-        if (lexer.ahead.type == CREATE) {
+        if (lexer.getAheadToken().type == CREATE) {
             create_stmt();
         } else {
             if (lexer.next.type == OUTPUT) {
@@ -67,21 +65,21 @@ class Parser {
     //这是一个实现的例子
     public void create_stmt() {
         move(); 
-        if (lexer.ahead.type != VIEW) error();
+        if (lexer.getAheadToken().type != VIEW) error();
         move();
-        if (lexer.ahead.type != ID) error();
-        string name = lexer.ahead.content;
-        createView(lexer.ahead.content); 
+        if (lexer.getAheadToken().type != ID) error();
+        string name = lexer.getAheadToken().content;
+        createView(lexer.getAheadToken().content); 
         move();
         view_stmt(name);
     }
     //创建View的语句,创建一条新View
     public void view_stmt(String name) {
-        if (lexer.ahead.type == SELECT) {
+        if (lexer.getAheadToken().type == SELECT) {
             move();
             select_stmt(name);
         }
-        if (lexer.ahead.type == EXTRACT) {
+        if (lexer.getAheadToken().type == EXTRACT) {
             move();
             extract_stmt(name)
         };
@@ -110,11 +108,11 @@ class Parser {
         string colName;
         map<int, string> nameSpec;
 
-        if (lexer.ahead.type == REGEX) {
+        if (lexer.getAheadToken().type == REGEX) {
             regex_spec(regexp, viewName, colName, nameSpec);
             flag = 0;
         } else {
-            if (lexer.ahead.type == PATTERN) {
+            if (lexer.getAheadToken().type == PATTERN) {
                 pattern_spec();
                 flag = 1;
             }
@@ -122,7 +120,7 @@ class Parser {
                 error();
             }
         }
-        if (lexer.ahead.type != FROM) {
+        if (lexer.getAheadToken().type != FROM) {
             error();
         }
         lexer.move();
@@ -154,13 +152,13 @@ class Parser {
     //public void extract_spec(vector<String> &regexps, );
     public void regex_spec(String &regexp, String &viewName, String &colName, map<int, string> &nameSpec) {
         move(); 
-        if (lexer.ahead.type != REGEXP) {
+        if (lexer.getAheadToken().type != REGEXP) {
             error();
             return;
         }   
-        regexp = lexer.ahead.content;
+        regexp = lexer.getAheadToken().content;
         move();
-        if (lexer.ahead.type != ON) {
+        if (lexer.getAheadToken().type != ON) {
             error();
             return;
         } 
@@ -171,60 +169,59 @@ class Parser {
         nameSpec = name_spec();
     }
     public pair<string, string> column() {
-        if (lexer.ahead.type != ID) {
+        if (lexer.getAheadToken().type != ID) {
             error();
             exit(0);
         }
-        string viewName = lexer.ahead.content; 
+        string viewName = lexer.getAheadToken().content; 
         move();
-        if (lexer.ahead.type != DOT) {
+        if (lexer.getAheadToken().type != DOT) {
             error();
             exit(0);
         }
-        if (lexer.ahead.type != ID) {
+        if (lexer.getAheadToken().type != ID) {
             error();
-             return;
         }
-        string colName = lexer.ahead.
+        string colName = lexer.getAheadToken.content;
         move();
         return make_pair(viewName, colName);
     }
     //返回来源View的别名以及其列名
     public map<int, string> name_spec() {
-        if (lexer.ahead.type == AS) {
+        if (lexer.getAheadToken().type == AS) {
             lexer.move();
-            if (lexer.ahead.type != ID) {
+            if (lexer.getAheadToken().type != ID) {
                 error();
             }
             map<int, string> nameSpec;
-            nameSpec[0] = lexer.ahead.content;
+            nameSpec[0] = lexer.getAheadToken().content;
             lexer.move(); 
             return nameSpec;
         }
-        if (lexer.ahead.type == RETURN) {
+        if (lexer.getAheadToken().type == RETURN) {
             lexer.move();
-            if (lexer.ahead.type != GROUP) error();
+            if (lexer.getAheadToken().type != GROUP) error();
             return group_spec();
         } 
     }
     //若是为as ID,则返回只有一个pair<0, ID>的map,否则返回 group_spec
     public map<int, string> group_spec() {
         map<int, string> list;
-        while (lexer.ahead.type == GROUP) {
+        while (lexer.getAheadToken().type == GROUP) {
             lexer.move();
-            if (lexer.ahead.type != NUM) error();
+            if (lexer.getAheadToken().type != NUM) error();
             stringstream ss;
-            ss << lexer.ahead.content;
+            ss << lexer.getAheadToken().content;
             int num;
             ss >> num; //提取num token
             lexer.move();
-            if (lexer.ahead.type != AS) error();
+            if (lexer.getAheadToken().type != AS) error();
             lexer.move();
-            if (lexer.ahead.type != ID) error();
-            string viewname = lexer.ahead.content;
+            if (lexer.getAheadToken().type != ID) error();
+            string viewname = lexer.getAheadToken().content;
             list[num] = viewname;
             move();
-            if (lexer.ahead.type != AND) break;
+            if (lexer.getAheadToken().type != AND) break;
             move();
         }
         return list;
@@ -237,69 +234,69 @@ class Parser {
         map<int, string> colList = namespec();
     }
     public void pattern_expr(PaternMatcher &matcher) {
-        if (lexer.ahead.type != BRACKETLEFT && lexer.ahead.type
-           != REGEXP && lexer.ahead.type != PARENLEFT) error();
+        if (lexer.getAheadToken().type != BRACKETLEFT && lexer.getAheadToken().type
+           != REGEXP && lexer.getAheadToken().type != PARENLEFT) error();
         int cont = 1;
         while (cont) {
             atom(matcher);
-            if (lexer.ahead.type != BRACKETLEFT && lexer.ahead.type
+            if (lexer.getAheadToken().type != BRACKETLEFT && lexer.getAheadToken().type
             != REGEXP) cont = 0;
         }
     }
     public void atom(PatternMatcher &matcher) {
-        if (lexer.ahead.type == PARENLEFT) {
+        if (lexer.getAheadToken().type == PARENLEFT) {
             move();
             matcher.insertSubMatcher();
             pattern_expr();
-            if (lexer.ahead.type != PARENLEFT) error();
+            if (lexer.getAheadToken().type != PARENLEFT) error();
             move();
             matcher.popSubMatcher();
         }
-        if (lexer.ahead.type == BRACKETLEFT) {
+        if (lexer.getAheadToken().type == BRACKETLEFT) {
             move();
             boolean isToken = 0;
             pair<string, string> col;
-            if (lexer.ahead.type == ID) {
+            if (lexer.getAheadToken().type == ID) {
                 col = column();
             } else {
-                if (lexer.ahead.type != TOKEN) error();
+                if (lexer.getAheadToken().type != TOKEN) error();
                 isToken = 1;
                 lexer.move();
             }     
             int bot = top = 1;
-            if (lexer.ahead.type == BRACESLEFT) {
+            if (lexer.getAheadToken().type == BRACESLEFT) {
                 move();
-                if (lexer.ahead.type != NUM) error();
+                if (lexer.getAheadToken().type != NUM) error();
                 stringstream ss;
-                ss << lexer.ahead.content;
+                ss << lexer.getAheadToken().content;
                 ss >> bot;
                 move();
-                if (lexer.ahead.type != NUM) error();
-                ss << lexer.ahead.content;
+                if (lexer.getAheadToken().type != NUM) error();
+                ss << lexer.getAheadToken().content;
                 ss >> top;
                 move();
-                if (lexer.ahead.type != BRACESRIGHT) error();
+                if (lexer.getAheadToken().type != BRACESRIGHT) error();
                 move();
             }
             if (isToken) matcher.insertToken(bot, up);
             else matcher.insert(col.first, col.second, bot, up);
         }
-        if (lexer.ahead.type == REGEXP) {
+        if (lexer.getAheadToken().type == REGEXP) {
             int bot = top = 1;
-            string regexp = lexer.ahead.content;
+            string regexp = lexer.getAheadToken().content;
             lexer.move();
-            if (lexer.ahead.type == BRACESLEFT) {
+            if (lexer.getAheadToken().type == BRACESLEFT) {
                 move();
-                if (lexer.ahead.type != NUM) error();
+                if (lexer.getAheadToken().type != NUM) error();
                 stringstream ss;
-                ss << lexer.ahead.content;
+                ss << lexer.getAheadToken().content;
                 ss >> bot;
                 move();
-                if (lexer.ahead.type != NUM) error();
-                ss << lexer.ahead.content;
+                if (lexer.getAheadToken().type != NUM) error();
+                ss << lexer.getAheadToken().content;
                 ss >> top;
                 move();
-                if (lexer.ahead.type != BRACESRIGHT) error();
+                if (lexer.getAheadToken().type != BRACESRIGHT) error();
                 move();
             } 
             matcher.insertReg(regexp, bot, up);

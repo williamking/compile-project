@@ -1,8 +1,7 @@
 #ifndef LEXER_H
 #define LEXER_H
 
-#include <iostream>
-#include <string>
+#include <string.h>
 #include <fstream>
 #include "Tokenizer.h"
 
@@ -42,7 +41,6 @@ private:
     //文本token提取器
     Token ahead;
     //向前看的token
-
 };
 
 #endif
