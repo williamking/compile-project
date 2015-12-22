@@ -7,15 +7,15 @@
 
 using namespace std;
 
-enum {
-    REG,
-    TOKEN,
-    COLUMN
-}
+//enum {
+//    REG,
+//    TOKEN,
+//    COLUMN
+//}
 
 
 struct Atom {
-    Atom(int t, string reg, string name, int bot, int up) {
+    Atom(int t, string reg, string name, int bot, int up, int paren) {
         type = t;
         regexp = reg;
         viewName = name;
@@ -32,64 +32,66 @@ struct Atom {
 //patern模式中的atom,可能为任意token,可能为某View中的一列,可能为正则表达式,用type表示其类型,若为正则,则表达式在value成员的regexp成员中,若为token,则其别名及列名在value成员的column成员中
 
 class PatternMatcher {
-    patternMatcher(string &t, vector<Token> &doc) {
+	private:
+    vector< vector<Atom> > atoms;
+    vector< vector< pair<int, int> > > results;
+    string text;
+    vector<Token> document;
+    map<string, string> columns;
+    map<int, string> returnList;
+    int current;
+    stack<int> catchStack;
+    public:
+    PatternMatcher(string &t, vector<Token> &doc) {
         current = 0;
         text = t;
         document = doc; 
         catchStack.push(0);
-        atoms.push_back(new vector<atom>);
+        atoms.push_back(vector<Atom>());
     }
-    private vector<vector<atom>> atoms;
-    private vector<vector<pair<int, int>>> results;
-    private string text;
-    private vector<Token> document;
-    private map<string, string> columns;
-    private map<int, string> returnList;
-    private int current;
-    private stack<int> catchStack;
-    public map<string, View> sourceViews;
-    public void insertReg(string regexp, int bot, int up) {
-        atoms[catchStack.top()].push_back(new Atom(0, regexp, "", bot, up, 0));
+    map<string, View> sourceViews;
+    void insertReg(string regexp, int bot, int up) {
+        atoms[catchStack.top()].push_back(Atom(0, regexp, "", bot, up, 0));
     }
-    public void insertColumn(string viewName, string colName, int, bot, int up) {
-        atoms[catchStack.top()].push_back(new Atom(1, "", viewName, bot, up, 0));
+    void insertColumn(string viewName, string colName, int bot, int up) {
+        atoms[catchStack.top()].push_back(Atom(1, "", viewName, bot, up, 0));
         columns[viewName] = colName;
     }
-    public void insertToken(int bot, int up) {
-        atoms[catchStack.top()].push_back(new Atom(2, "", "", bot, up, 0));
+    void insertToken(int bot, int up) {
+        atoms[catchStack.top()].push_back(Atom(2, "", "", bot, up, 0));
     }
-    public void insertSubMatcher() {
+    void insertSubMatcher() {
         catchStack.push(current + 1);
-        vector<atom> newAtom;
-        atom.push_back(newAtom);
-        atom[catchStack.top()].push_back(new Atom(3, "", "", 0, 0, ++current));
+        vector<Atom> newAtom;
+        atoms.push_back(newAtom);
+        atoms[catchStack.top()].push_back(Atom(3, "", "", 0, 0, ++current));
     }
-    public void insertReturnColumn(int index, string colName) {
+    void insertReturnColumn(int index, string colName) {
         returnList[index] = colName;
     }
-    public popSubMatcher() {
+    void popSubMatcher() {
         catchStack.pop();
     }
-    public vector<Token> match(View &textView, map<string, View> &views) {
+    vector<Token> match(View &textView, map<string, View> &views) {
         sourceViews = views;
         for (int i = 0; i < atoms.size(); ++i) {
-            result.push_back(new vector<string>);
+            results.push_back(vector< pair<int, int> >());
         }
         for (int i = atoms.size() - 1; i >= 0; --i) {
             check(i, 0, -1, -1);
         } 
     }
-    public void check(int stackIndex, int j, int start, int pos) {
+    void check(int stackIndex, int j, int start, int pos) {
         if (j >= atoms[stackIndex].size()) {
             results[stackIndex].push_back(make_pair(start, pos - start + 1));
         }
         if (atoms[stackIndex][j].type == 0) {
-            regexp = atom[stackIndex][j].regexp;
-            pair<int, int> nums = atom[stackIndex][j].nums;
+            string regexp = atoms[stackIndex][j].regexp;
+            pair<int, int> nums = atoms[stackIndex][j].nums;
             string newReg = "";
             for (int i = 0; i < nums.first; ++i) newReg += regexp;
             for (int k = nums.first; k <= nums.second; ++k) {
-                vector<vector<int>> spans = finall(newReg, text);
+                vector< vector<int> > spans = findall(newReg.c_str(), text.c_str());
                 for (int i = 0; i < spans.size(); ++i) {
                     if (spans[i][0] == (pos + 1) && pos != -1)
                         check(stackIndex, j + 1, start, spans[i][1]);
@@ -101,29 +103,29 @@ class PatternMatcher {
             } 
         }
         if (atoms[stackIndex][j].type == 1) {
-            viewName = atoms[stackIndex][j].viewName;
-            colName = columns[viewName]; 
-            view = sourceViews[viewName];
+            string viewName = atoms[stackIndex][j].viewName;
+            string colName = columns[viewName]; 
+            View view = sourceViews[viewName];
             vector<Token> val = view.groups[view.colIndex[colName]];
             pair<int, int> nums = atoms[stackIndex][j].nums;
-            vector<vector<pair<int, int>>> availables; 
-            for (int i = num.fisrt; i < nums.second; ++i)
-                availables.push_back(new vector<pair<int, int>>);
+            vector< vector< pair<int, int> > > availables; 
+            for (int i = nums.first; i < nums.second; ++i)
+                availables.push_back(vector< pair<int, int> >());
             for (int i = 0; i < val.size(); ++i) {
                 int start = val[i].position;
                 int end = val[i].position + val[i].content.length();
                 int j;
                 for (j = 2; j <= nums.first; ++i) {
                     if (val[i + j - 1].position == end)
-                        end = val[i + j - 1].position + val[i + j -1].position + val[i + j - 1].position.length();
+                        end = val[i + j - 1].position + val[i + j -1].position + val[i + j - 1].content.length();
                     else
                         break;
                 } 
                 if (j == nums.first + 1) {
                     for (j = nums.first; j <= nums.second; ++j) {
-                        availables[j - nums.first].push_back(start, end);
+                        availables[j - nums.first].push_back(make_pair(start, end));
                         if (val[i + j].position == end) {
-                            end = val[i + j - 1].positon + val[i + j - 1].position + val[i + j - 1].position.length();
+                            end = val[i + j - 1].position + val[i + j - 1].content.length();
                         }
                     }
                 }
@@ -142,8 +144,9 @@ class PatternMatcher {
         if (atoms[stackIndex][j].type == 2) {
             int from = -1; 
             int bot = atoms[stackIndex][j].nums.first;
-            int top = atoms[stackIndex][j].num.second;
-            for (int i = 0; i < document.size() - bot; ++i) {
+            int top = atoms[stackIndex][j].nums.second;
+            int i;
+            for (i = 0; i < document.size() - bot; ++i) {
                 if (document[i].position > pos && pos != -1) {
                     from = document[i].position;
                     break;
@@ -165,7 +168,7 @@ class PatternMatcher {
                 } else {
                     for (int k = bot; k < top; ++k) {
                         if (i + k < document.size()) {
-                            check(stackIndex, j + 1, start, document[i + k].position, document[i + k].position
+                            check(stackIndex, j + 1, start, document[i + k].position
                             + document[i + k].content.length());
                         }
                     }
@@ -174,8 +177,8 @@ class PatternMatcher {
         }   
         if (atoms[stackIndex][j].type == 3) {
             int paren = atoms[stackIndex][j].parenNum;
-            vector<Token> result = results[paren]
-            for (int i = 0; i < result.size()) {
+            vector< pair<int, int > > result = results[paren];
+            for (int i = 0; i < result.size(); ++i) {
                 if (result[i].first == pos + 1 && pos != -1) {
                     check(stackIndex, j+ 1, start, result[i].second);
                 }
