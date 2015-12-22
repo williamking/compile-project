@@ -68,7 +68,7 @@ class Parser {
             create_stmt();
         } else {
             if (lexer.getAheadToken().type == OUTPUT) {
-                output_stmt();
+                //output_stmt();
             } else {
                 error();
             }
@@ -87,10 +87,10 @@ class Parser {
     }
     //创建View的语句,创建一条新View
     void view_stmt(string name) {
-        if (lexer.getAheadToken().type == SELECT) {
-            move();
-            select_stmt(name);
-        }
+        //if (lexer.getAheadToken().type == SELECT) {
+        //    move();
+        //    select_stmt(name);
+        //}
         if (lexer.getAheadToken().type == EXTRACT) {
             move();
             extract_stmt(name);
@@ -107,9 +107,24 @@ class Parser {
     //map的key为选择的列并入到新View中的列名,value为选择的View别名和其列名组成的pair
     //pair< string, pair<string, string> > select_item();
     //返回select_list中map的一个value
-    //map<string, string> from_list();
+    map<string, string> from_list() {
+        map <string, string> results;
+        while (lexer.getAheadToken().type == ID) {
+            results.insert(from_item());
+        }
+        if (lexer.getAheadToken().type != SEMICOLON) error();
+        move();
+    }
     //返回View名和其别名组成的map
-    //pair<string, string> from_item();
+    pair<string, string> from_item() {
+        if (lexer.getAheadToken().type != ID) error();
+        string realName = lexer.getAheadToken().content;
+        move();
+        if (lexer.getAheadToken().type != ID) error();
+        string name = lexer.getAheadToken().content;
+        move();
+        return make_pair(name, realName);
+    }
     //返回View名和其别名组成的pair
     void extract_stmt(string name) {
         bool flag = false;

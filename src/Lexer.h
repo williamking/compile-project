@@ -11,13 +11,13 @@ class Lexer {
 
 public:
     Lexer(string filename) {
-        ahead = Token();
         if (filename != "") {
             tokenizer = new Tokenizer(filename);
             if (!tokenizer) {
                 cerr << "Tokenizer:Out of memory!" << endl;
                 exit(0);
             }
+            move();
         }
     }
     //构造函数,参数为文件名

@@ -38,7 +38,8 @@ enum TYPE {
     BRACKETLEFT = '<', //左尖括号
     BRACKETRIGHT = '>', //右尖括号
     BRACESLEFT = '{', //左大括号
-    BRACESRIGHT = '}' //右大括号
+    BRACESRIGHT = '}', //右大括号
+    SEMICOLON = ';'
 };
 
 class Token {
@@ -107,7 +108,7 @@ public:
     }
 
     Token getToken() {
-        while (isblank(peek) || peek == '\n') {
+        while (peek == ' ' || peek == '\n') {
             readch();
         }
 
