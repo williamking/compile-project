@@ -98,7 +98,9 @@ class PatternMatcher {
                 vector< vector<int> > spans = findall(newReg.c_str(), text.c_str());
                 for (int i = 0; i < spans.size(); ++i) {
                     int ep = spans[i][1];
-                    while (text[ep] == ' ') ++ep;
+                    //while (text[ep] == ' ') ++ep;
+                    if (pos != -1)
+                        while (text[pos] == ' ') ++pos;
                     if (spans[i][0] == pos && pos != -1)
                         check(stackIndex, j + 1, start, ep);
                     if (pos == -1) {
@@ -144,7 +146,9 @@ class PatternMatcher {
             for (int i = 0; i < nums.second - nums.first + 1; ++i) {
                 for (int k = 0 ; k < availables[i].size(); ++k) {
                     int ep = availables[i][k].second;
-                    while (text[ep] == ' ') ++ep;
+                    //while (text[ep] == ' ') ++ep;
+                    if (pos != -1)
+                        while (text[pos] == ' ') ++pos;
                     if (availables[i][k].first == pos && pos != -1) {
                         check(stackIndex, j + 1, start, ep);
                     }
@@ -161,21 +165,21 @@ class PatternMatcher {
             int top = atoms[stackIndex][j].nums.second;
             int i;
             for (i = 0; i < document.size() - bot; ++i) {
-                if (document[i].position > pos && pos != -1) {
-                    from = document[i].position;
+                if (document[i + 1].position >= pos && pos != -1) {
+                    from = document[i + 1].position;
                     break;
                 }
                 if (pos == -1) {
-                    from = document[i].position;
+                    from = document[i + 1].position;
                     break;
                 }
             }
-            --i;
             if (from != -1) {
                 if (start == -1) {
                     for (int k = bot; k < top; ++k) {
+                        if (i + k >= document.size()) break;
                         int ep = document[i + k].position + document[i + k].content.length();
-                        while (text[ep] == ' ') ++ep;
+                        //while (text[ep] == ' ') ++ep;
                         if (i + k < document.size()) {
                             check(stackIndex, j + 1, from, ep);
                         }
@@ -183,7 +187,7 @@ class PatternMatcher {
                 } else {
                     for (int k = bot; k < top; ++k) {
                         int ep = document[i + k].position + document[i + k].content.length();
-                        while (text[ep] == ' ') ++ep;
+                        //while (text[ep] == ' ') ++ep;
                         if (i + k < document.size()) {
                             check(stackIndex, j + 1, start, ep);
                         }
@@ -197,7 +201,9 @@ class PatternMatcher {
             vector< pair<int, int > > result = results[paren];
             for (int i = 0; i < result.size(); ++i) {
                 int ep = result[i].second;
-                while (text[ep] == ' ') ++ep;
+                //while (text[ep] == ' ') ++ep;
+                if (pos != -1)
+                    while (text[pos] == ' ') ++pos;
                 if (result[i].first == pos && pos != -1) {
                     check(stackIndex, j+ 1, start, ep);
                 }

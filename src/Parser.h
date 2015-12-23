@@ -340,7 +340,9 @@ class Parser {
                 if (lexer.getAheadToken().type != TOKEN) error();
                 isToken = 1;
                 move();
-            }     
+            }
+            if (lexer.getAheadToken().type != BRACKETRIGHT) error();
+            move();
             int bot = 1, top = 1;
             if (lexer.getAheadToken().type == BRACESLEFT) {
                 move();
@@ -349,15 +351,16 @@ class Parser {
                 ss << lexer.getAheadToken().content;
                 ss >> bot;
                 move();
+                if (lexer.getAheadToken().type != COMMA) error();
+                move();
                 if (lexer.getAheadToken().type != NUM) error();
-                ss << lexer.getAheadToken().content;
-                ss >> top;
+                stringstream st;
+                st << lexer.getAheadToken().content;
+                st >> top;
                 move();
                 if (lexer.getAheadToken().type != BRACESRIGHT) error();
                 move();
             }
-            if (lexer.getAheadToken().type != BRACKETRIGHT) error();
-            move();
             if (isToken) matcher.insertToken(bot, top);
             else matcher.insertColumn(col.first, col.second, bot, top);
             return;
