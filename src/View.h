@@ -21,7 +21,7 @@ public:
         groups[index->second].push_back(token);
     }
     //往列中插入元素
-    void soutput() {
+    void output() {
     }
     //输出View
     vector<Token>& findByColName(string name) {

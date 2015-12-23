@@ -38,7 +38,7 @@ class Parser {
         textString = "";
         string str;
         ifstream fileStream;
-        fileStream.open(fName.c_str(), ifstream::in);
+        fileStream.open(artName.c_str(), ifstream::in);
         while (getline(fileStream, str)) {
             textString += str + "\n";
         }
@@ -56,7 +56,7 @@ class Parser {
     //创建一个新的View
 
     void exec() {
-        //while (lexer.getAheadToken().type != END)
+        while (lexer.move())
 		 	aql_stmt();
         //for (int i = 0; i < views.size(); ++i) {
         //    views[i].output();
@@ -64,6 +64,7 @@ class Parser {
     }
     //执行文本中一条AQL语句
     void aql_stmt() {
+        cout << lexer.getAheadToken().content << endl;
         if (lexer.getAheadToken().type == CREATE) {
             create_stmt();
         } else {
@@ -83,7 +84,19 @@ class Parser {
         string name = lexer.getAheadToken().content;
         createView(lexer.getAheadToken().content); 
         move();
+        if (lexer.getAheadToken().type != AS) error();
+        move();
         view_stmt(name);
+        cout << "View: " << name << endl;
+        View result = views[viewIndex[name]];
+        for (map<string, int>::iterator it = result.colIndex.begin(); it != result.colIndex.end(); ++it) {
+            cout << it->first << ':' << endl;
+            vector<Token> col = result.groups[it->second];
+            for (int j = 0; j < col.size(); ++j) {
+                Token tok = col[j];
+                cout << tok.content << ": (" << tok.position << ',' << tok.position + tok.content.length() << ')' << endl;
+            }
+        }
     }
     //创建View的语句,创建一条新View
     void view_stmt(string name) {
@@ -91,6 +104,7 @@ class Parser {
         //    move();
         //    select_stmt(name);
         //}
+        cout << lexer.getAheadToken().type;
         if (lexer.getAheadToken().type == EXTRACT) {
             move();
             extract_stmt(name);
@@ -109,14 +123,19 @@ class Parser {
     //返回select_list中map的一个value
     map<string, string> from_list() {
         map <string, string> results;
-        while (lexer.getAheadToken().type == ID) {
+        bool cont = true;
+        do {
             results.insert(from_item());
-        }
+            cout << lexer.getAheadToken().content << endl;
+            if (lexer.getAheadToken().type != COMMA) cont = false;
+            else move();
+        } while (cont);
         if (lexer.getAheadToken().type != SEMICOLON) error();
-        move();
+        return results;
     }
     //返回View名和其别名组成的map
     pair<string, string> from_item() {
+        cout << lexer.getAheadToken().content << endl;
         if (lexer.getAheadToken().type != ID) error();
         string realName = lexer.getAheadToken().content;
         move();
@@ -140,7 +159,8 @@ class Parser {
         } else {
             if (lexer.getAheadToken().type == PATTERN) {
                 flag = true;
-                pattern_spec(matcher); 
+                move();
+                pattern_spec(matcher, nameSpec); 
             }
             else {
                 error();
@@ -153,6 +173,11 @@ class Parser {
         map<string, string> fromList = from_list();
         if (!flag) {
             View &view = views[viewIndex[name]];
+            //cout << "viewName:" << viewName << endl;
+            //cout << "regexp: " << regexp << endl;
+            //cout << "colName: " << colName << endl;
+            //cout << "realName: " << fromList[viewName] << endl;
+            //cout << "index: " << viewIndex[fromList[viewName]] << endl;
             View &fromView = views[viewIndex[fromList[viewName]]];
             vector<Token> col = fromView.groups[fromView.colIndex[colName]];
             vector< vector<int> > spans = findall(regexp.c_str(), textString.c_str());
@@ -160,17 +185,40 @@ class Parser {
                 view.createGroup(nameSpec[j]);
             for (int i = 0; i < spans.size(); ++i) {
                 for (int j = 0; j < spans[i].size(); j += 2) {
-                    Token token = Token(textString.substr(spans[i][j], spans[i][j + 1] - spans[i][j]), ID, 0, spans[i][j], 0);  
+                    Token token = Token(textString.substr(spans[i][j], spans[i][j + 1] - spans[i][j]), ID, 0, 0, spans[i][j]);  
                     view.insert(nameSpec[j / 2], token);
                 }   
             }
         } else {
+            View &view = views[viewIndex[name]];
             map<string, View> fromViewsList;
             map<string, string>::iterator it;
             for (it = fromList.begin(); it != fromList.end(); ++it) {
                 fromViewsList[it->first] = views[viewIndex[it->second]]; 
             }
-            matcher.match(views[0], fromViewsList);
+            cout << views.size() << endl;
+            View &a = views[0];
+            vector< vector< pair<int, int> > > results = matcher.match(a, fromViewsList);
+            for (int j = 0; j < nameSpec.size(); ++j) {
+                view.createGroup(nameSpec[j]);
+            }
+            for (int i = 0; i < results.size(); ++i) {
+                //cout << "name: " << nameSpec[i] << endl;
+                for (int j = 0; j < results[i].size(); ++j) {
+                    if (i != 0) {
+                        bool jud = false;
+                        for (int k = 0; k < results[0].size(); ++k) {
+                            if ((results[0][k].first <= results[i][j].first) && (results[i][j].second <= results[0][k].second)) {
+                                jud = true;
+                                break;
+                            }
+                        }
+                        if (!jud) continue;
+                    }
+                    //cout << "content: " << textString.substr(results[i][j].first, results[i][j].second - results[i][j].first) << endl;
+                    view.insert(nameSpec[i], Token(textString.substr(results[i][j].first, results[i][j].second - results[i][j].first), ID, 0, 0, results[i][j].first));
+                }   
+            }     
         }
     }
     //执行正则匹配操作,并将结果赋予新View,参数为View的名称
@@ -202,8 +250,8 @@ class Parser {
         move();
         if (lexer.getAheadToken().type != DOT) {
             error();
-            exit(0);
         }
+        move();
         if (lexer.getAheadToken().type != ID) {
             error();
         }
@@ -213,6 +261,7 @@ class Parser {
     }
     //返回来源View的别名以及其列名
     map<int, string> name_spec() {
+        cout << lexer.getAheadToken().content << endl;
         if (lexer.getAheadToken().type == AS) {
             lexer.move();
             if (lexer.getAheadToken().type != ID) {
@@ -254,39 +303,43 @@ class Parser {
     //返回列号与列名的map
     //public pair<int, String> single_group();
     //返回新View列号与操作的新View的列名的pair
-    void pattern_spec(PatternMatcher &matcher) {
+    void pattern_spec(PatternMatcher &matcher, map<int, string> &nameSpec) {
         pattern_expr(matcher); 
-        map<int, string> colList = name_spec();
+        nameSpec = name_spec();
     }
     void pattern_expr(PatternMatcher &matcher) {
+        //cout << lexer.getAheadToken().content << endl;
         if (lexer.getAheadToken().type != BRACKETLEFT && lexer.getAheadToken().type
            != REG && lexer.getAheadToken().type != PARENLEFT) error();
         int cont = 1;
         while (cont) {
             atom(matcher);
+            cout << lexer.getAheadToken().content << endl;
             if (lexer.getAheadToken().type != BRACKETLEFT && lexer.getAheadToken().type
-            != REG) cont = 0;
+            != REG && lexer.getAheadToken().type != PARENLEFT) cont = 0;
         }
     }
     void atom(PatternMatcher &matcher) {
         if (lexer.getAheadToken().type == PARENLEFT) {
-            lexer.move();
+            move();
             matcher.insertSubMatcher();
             pattern_expr(matcher);
-            if (lexer.getAheadToken().type != PARENLEFT) error();
-            lexer.move();
+            if (lexer.getAheadToken().type != PARENRIGHT) error();
+            move();
             matcher.popSubMatcher();
+            return;
         }
         if (lexer.getAheadToken().type == BRACKETLEFT) {
             move();
             bool isToken = 0;
             pair<string, string> col;
+            cout << lexer.getAheadToken().content << endl;
             if (lexer.getAheadToken().type == ID) {
                 col = column();
             } else {
                 if (lexer.getAheadToken().type != TOKEN) error();
                 isToken = 1;
-                lexer.move();
+                move();
             }     
             int bot = 1, top = 1;
             if (lexer.getAheadToken().type == BRACESLEFT) {
@@ -303,8 +356,11 @@ class Parser {
                 if (lexer.getAheadToken().type != BRACESRIGHT) error();
                 move();
             }
+            if (lexer.getAheadToken().type != BRACKETRIGHT) error();
+            move();
             if (isToken) matcher.insertToken(bot, top);
             else matcher.insertColumn(col.first, col.second, bot, top);
+            return;
         }
         if (lexer.getAheadToken().type == REG) {
             int bot = 1;

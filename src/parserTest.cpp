@@ -5,9 +5,13 @@
 using namespace std;
 
 int main() {
-	cout << "Input the AQL file name and the Article filename";
+	cout << "Input the AQL file name and the Article filename" << endl;
 	string aql, art;
-	cin >> aql, art;
+	//cin >> aql;
+	//cin >> art;
+	aql = "PerLoc.aql";
+	art = "PerLoc.input";
 	Parser parser(aql, art);
-	parser.aql_stmt();
+	parser.exec();
+	return 0;
 }

@@ -138,7 +138,7 @@ public:
             if (s == "return") return Token(s, RETURN, tok_row, tok_col, pos);
             if (s == "group") return Token(s, GROUP, tok_row, tok_col, pos);
             if (s == "and") return Token(s, AND, tok_row, tok_col, pos);
-            if (s == "Token") return Token(s, TOKEN, tok_row, tok_col, pos);
+            if (s == "Token" || s == "token") return Token(s, TOKEN, tok_row, tok_col, pos);
             if (s == "pattern") return Token(s, PATTERN, tok_row, tok_col, pos);
             return Token(s, ID, tok_row, tok_col, pos);
         }

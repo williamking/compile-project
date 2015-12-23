@@ -61,10 +61,11 @@ class PatternMatcher {
         atoms[catchStack.top()].push_back(Atom(2, "", "", bot, up, 0));
     }
     void insertSubMatcher() {
+        int p = catchStack.top();
         catchStack.push(current + 1);
         vector<Atom> newAtom;
         atoms.push_back(newAtom);
-        atoms[catchStack.top()].push_back(Atom(3, "", "", 0, 0, ++current));
+        atoms[p].push_back(Atom(3, "", "", 0, 0, ++current));
     }
     void insertReturnColumn(int index, string colName) {
         returnList[index] = colName;
@@ -72,18 +73,21 @@ class PatternMatcher {
     void popSubMatcher() {
         catchStack.pop();
     }
-    vector<Token> match(View &textView, map<string, View> &views) {
+    vector< vector< pair<int, int> > > match(View &textView, map<string, View> &views) {
         sourceViews = views;
         for (int i = 0; i < atoms.size(); ++i) {
             results.push_back(vector< pair<int, int> >());
         }
         for (int i = atoms.size() - 1; i >= 0; --i) {
             check(i, 0, -1, -1);
-        } 
+        }
+        return results;
     }
+    //以栈的方式保存括号层次关系,j表示第几个Atom,start表示文章中匹配的起始位置,pos为当前匹配的位置 
     void check(int stackIndex, int j, int start, int pos) {
         if (j >= atoms[stackIndex].size()) {
-            results[stackIndex].push_back(make_pair(start, pos - start + 1));
+            results[stackIndex].push_back(make_pair(start, pos));
+            return;
         }
         if (atoms[stackIndex][j].type == 0) {
             string regexp = atoms[stackIndex][j].regexp;
@@ -93,14 +97,17 @@ class PatternMatcher {
             for (int k = nums.first; k <= nums.second; ++k) {
                 vector< vector<int> > spans = findall(newReg.c_str(), text.c_str());
                 for (int i = 0; i < spans.size(); ++i) {
-                    if (spans[i][0] == (pos + 1) && pos != -1)
-                        check(stackIndex, j + 1, start, spans[i][1]);
+                    int ep = spans[i][1];
+                    while (text[ep] == ' ') ++ep;
+                    if (spans[i][0] == pos && pos != -1)
+                        check(stackIndex, j + 1, start, ep);
                     if (pos == -1) {
-                        check(stackIndex, j + 1, spans[i][0], spans[i][1]); 
+                        check(stackIndex, j + 1, spans[i][0], ep); 
                     }
                 }
                 newReg += regexp;
-            } 
+            }
+            return;
         }
         if (atoms[stackIndex][j].type == 1) {
             string viewName = atoms[stackIndex][j].viewName;
@@ -109,37 +116,44 @@ class PatternMatcher {
             vector<Token> val = view.groups[view.colIndex[colName]];
             pair<int, int> nums = atoms[stackIndex][j].nums;
             vector< vector< pair<int, int> > > availables; 
-            for (int i = nums.first; i < nums.second; ++i)
+            for (int i = nums.first; i <= nums.second; ++i)
                 availables.push_back(vector< pair<int, int> >());
+            for (int i = 0; i < val.size(); ++i) {
+                cout << val[i].position << ' ';
+            }
+            cout << endl;
             for (int i = 0; i < val.size(); ++i) {
                 int start = val[i].position;
                 int end = val[i].position + val[i].content.length();
-                int j;
-                for (j = 2; j <= nums.first; ++i) {
-                    if (val[i + j - 1].position == end)
-                        end = val[i + j - 1].position + val[i + j -1].position + val[i + j - 1].content.length();
+                int k;
+                for (k = 2; k <= nums.first; ++k) {
+                    if (val[i + k - 1].position == end)
+                        end = val[i + k - 1].position + val[i + k -1].position + val[i + k - 1].content.length();
                     else
                         break;
                 } 
-                if (j == nums.first + 1) {
-                    for (j = nums.first; j <= nums.second; ++j) {
-                        availables[j - nums.first].push_back(make_pair(start, end));
-                        if (val[i + j].position == end) {
-                            end = val[i + j - 1].position + val[i + j - 1].content.length();
+                if (k == nums.first + 1) {
+                    for (k = nums.first; k <= nums.second; ++k) {
+                        availables[k - nums.first].push_back(make_pair(start, end));
+                        if (val[i + k].position == end) {
+                            end = val[i + k - 1].position + val[i + k - 1].content.length();
                         }
                     }
                 }
             }
             for (int i = 0; i < nums.second - nums.first + 1; ++i) {
-                for (int j = 0 ; j = availables[i].size(); ++j) {
-                    if (availables[i][j].first == pos && pos != -1) {
-                        check(stackIndex, j + 1, start, availables[i][j].second);
+                for (int k = 0 ; k < availables[i].size(); ++k) {
+                    int ep = availables[i][k].second;
+                    while (text[ep] == ' ') ++ep;
+                    if (availables[i][k].first == pos && pos != -1) {
+                        check(stackIndex, j + 1, start, ep);
                     }
-                    if (val[i].position == -1) {
-                        check(stackIndex, j + 1, availables[i][j].first, availables[i][j].second);
+                    if (pos == -1) {
+                        check(stackIndex, j + 1, availables[i][k].first, ep);
                     }
                 } 
             }
+            return;
         }
         if (atoms[stackIndex][j].type == 2) {
             int from = -1; 
@@ -160,30 +174,35 @@ class PatternMatcher {
             if (from != -1) {
                 if (start == -1) {
                     for (int k = bot; k < top; ++k) {
+                        int ep = document[i + k].position + document[i + k].content.length();
+                        while (text[ep] == ' ') ++ep;
                         if (i + k < document.size()) {
-                            check(stackIndex, j + 1, from, document[i + k].position
-                            + document[i + k].content.length());
+                            check(stackIndex, j + 1, from, ep);
                         }
                     }
                 } else {
                     for (int k = bot; k < top; ++k) {
+                        int ep = document[i + k].position + document[i + k].content.length();
+                        while (text[ep] == ' ') ++ep;
                         if (i + k < document.size()) {
-                            check(stackIndex, j + 1, start, document[i + k].position
-                            + document[i + k].content.length());
+                            check(stackIndex, j + 1, start, ep);
                         }
                     }
                 }
             }
+            return;
         }   
         if (atoms[stackIndex][j].type == 3) {
             int paren = atoms[stackIndex][j].parenNum;
             vector< pair<int, int > > result = results[paren];
             for (int i = 0; i < result.size(); ++i) {
-                if (result[i].first == pos + 1 && pos != -1) {
-                    check(stackIndex, j+ 1, start, result[i].second);
+                int ep = result[i].second;
+                while (text[ep] == ' ') ++ep;
+                if (result[i].first == pos && pos != -1) {
+                    check(stackIndex, j+ 1, start, ep);
                 }
                 if (pos == -1) {
-                    check(stackIndex, j + 1, result[i].first, result[i].second);
+                    check(stackIndex, j + 1, result[i].first, ep);
                 }
             }
         }

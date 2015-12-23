@@ -17,7 +17,6 @@ public:
                 cerr << "Tokenizer:Out of memory!" << endl;
                 exit(0);
             }
-            move();
         }
     }
     //构造函数,参数为文件名
