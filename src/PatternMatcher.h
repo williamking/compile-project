@@ -21,7 +21,6 @@ struct Atom {
         viewName = name;
         nums = make_pair(bot, up);
         parenNum = paren;
-        bool valid = false;
     }
     int type;
     //Atom类型,0为正则,1为列,2为token,3为子表达式
@@ -29,7 +28,7 @@ struct Atom {
     string viewName;
     pair<int, int> nums;
     int parenNum;
-    bool valid;
+    int currentNum;
 };
 //patern模式中的atom,可能为任意token,可能为某View中的一列,可能为正则表达式,用type表示其类型,若为正则,则表达式在value成员的regexp成员中,若为token,则其别名及列名在value成员的column成员中
 
@@ -37,6 +36,7 @@ class PatternMatcher {
 	private:
     vector< vector<Atom> > atoms;
     vector< vector< pair<int, int> > > results;
+    vector< vector< vector<int> > > > resultParens;
     string text;
     vector<Token> document;
     map<string, string> columns;
@@ -79,15 +79,23 @@ class PatternMatcher {
         sourceViews = views;
         for (int i = 0; i < atoms.size(); ++i) {
             results.push_back(vector< pair<int, int> >());
+            resultParens.pushback(vector< vector<int> >());
         }
         for (int i = atoms.size() - 1; i >= 0; --i) {
             check(i, 0, -1, -1);
         }
+        filtResults();
         return results;
     }
     //��ջ�ķ�ʽ�������Ų�ι�ϵ,j��ʾ�ڼ���Atom,start��ʾ������ƥ�����ʼλ��,posΪ��ǰƥ���λ�� 
     void check(int stackIndex, int j, int start, int pos) {
         if (j >= atoms[stackIndex].size()) {
+            for (int i = 0; i < atoms[stackIndex].size()) {
+                if (atoms[stackIndex][i].type == paren) {
+                    pars.push_back(atoms[stackIndex][i].currentParenAtom);
+                }
+            }
+             resultParens[stackIndex].push_back(pars);
             results[stackIndex].push_back(make_pair(start, pos));
             return;
         }
@@ -207,22 +215,21 @@ class PatternMatcher {
                 if (pos != -1)
                     while (text[pos] == ' ') ++pos;
                 if (result[i].first == pos && pos != -1) {
-                    check(stackIndex, j+ 1, start, ep);
+                    atoms[stackIndex][j].currentAtom = i;
+                    check(stackIndex, j + 1, start, ep);
                 }
                 if (pos == -1) {
+                    atoms[stackIndex][j].currentAtom = i;
                     check(stackIndex, j + 1, result[i].first, ep);
-                }
-                if (stackIndex == 0 && result[i].first != pos && pos != -1) {
-                    del(paren, i);
                 }
             }
         }
     }
     
-    void del(paren, index) {
-        results[paren][index] = make_pair(-1, -1);
-        for (int i = 0; i < atoms[paren].size(); ++i) {
-            if atom[paren][i].type
+    void filtResults(parenNum) {
+        results[parenNum]
+        for (int i = 0; i < atoms[parenNum]; ++i) {
+                
         }
     }
 
