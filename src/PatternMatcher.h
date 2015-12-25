@@ -28,7 +28,7 @@ struct Atom {
     string viewName;
     pair<int, int> nums;
     int parenNum;
-    int currentNum;
+    int currentAtom;
 };
 //paternæ¨¡å¼ä¸­çš„atom,å¯èƒ½ä¸ºä»»æ„token,å¯èƒ½ä¸ºæŸViewä¸­çš„ä¸€åˆ—,å¯èƒ½ä¸ºæ­£åˆ™è¡¨è¾¾å¼,ç”¨typeè¡¨ç¤ºå…¶ç±»å‹,è‹¥ä¸ºæ­£åˆ™,åˆ™è¡¨è¾¾å¼åœ¨valueæˆå‘˜çš„regexpæˆå‘˜ä¸­,è‹¥ä¸ºtoken,åˆ™å…¶åˆ«ååŠåˆ—ååœ¨valueæˆå‘˜çš„columnæˆå‘˜ä¸­
 
@@ -36,7 +36,7 @@ class PatternMatcher {
 	private:
     vector< vector<Atom> > atoms;
     vector< vector< pair<int, int> > > results;
-    vector< vector< vector<int> > > > resultParens;
+    vector< vector< vector< pair<int, int> > > > resultParens;
     string text;
     vector<Token> document;
     map<string, string> columns;
@@ -79,24 +79,36 @@ class PatternMatcher {
         sourceViews = views;
         for (int i = 0; i < atoms.size(); ++i) {
             results.push_back(vector< pair<int, int> >());
-            resultParens.pushback(vector< vector<int> >());
+            resultParens.push_back(vector< vector< pair<int, int> > >());
         }
         for (int i = atoms.size() - 1; i >= 0; --i) {
             check(i, 0, -1, -1);
         }
-        filtResults();
-        return results;
+        vector< vector< pair<int, int> > > filtResults;
+        for (int i = 0; i < results.size(); ++i) {
+            filtResults.push_back(vector< pair<int, int> >());
+        }
+        for (int i = 0; i < results[0].size(); ++i) {
+            filtResults[0].push_back(results[0][i]);
+        }
+        for (int j = 0; j < resultParens[0].size(); ++j) {
+            for (int k = 0; k < resultParens[0][j].size(); ++k) {
+                filt(resultParens[0][j][k].first, resultParens[0][j][k].second, filtResults);
+            }
+        }
+        return filtResults;
     }
     //ÒÔÕ»µÄ·½Ê½±£´æÀ¨ºÅ²ã´Î¹ØÏµ,j±íÊ¾µÚ¼¸¸öAtom,start±íÊ¾ÎÄÕÂÖĞÆ¥ÅäµÄÆğÊ¼Î»ÖÃ,posÎªµ±Ç°Æ¥ÅäµÄÎ»ÖÃ 
     void check(int stackIndex, int j, int start, int pos) {
         if (j >= atoms[stackIndex].size()) {
-            for (int i = 0; i < atoms[stackIndex].size()) {
-                if (atoms[stackIndex][i].type == paren) {
-                    pars.push_back(atoms[stackIndex][i].currentParenAtom);
+            vector< pair<int, int> > pars;
+            results[stackIndex].push_back(make_pair(start, pos));
+            for (int i = 0; i < atoms[stackIndex].size(); ++i) {
+                if (atoms[stackIndex][i].type == 3) {
+                    pars.push_back(make_pair(atoms[stackIndex][i].parenNum, atoms[stackIndex][i].currentAtom));
                 }
             }
-             resultParens[stackIndex].push_back(pars);
-            results[stackIndex].push_back(make_pair(start, pos));
+            resultParens[stackIndex].push_back(pars);
             return;
         }
         if (atoms[stackIndex][j].type == 0) {
@@ -125,15 +137,11 @@ class PatternMatcher {
             string viewName = atoms[stackIndex][j].viewName;
             string colName = columns[viewName]; 
             View view = sourceViews[viewName];
-            vector<Token> val = view.groups[view.colIndex[colName]];
+            vector<Token> val = view.getColByName(colName);
             pair<int, int> nums = atoms[stackIndex][j].nums;
             vector< vector< pair<int, int> > > availables; 
             for (int i = nums.first; i <= nums.second; ++i)
                 availables.push_back(vector< pair<int, int> >());
-            for (int i = 0; i < val.size(); ++i) {
-                cout << val[i].position << ' ';
-            }
-            cout << endl;
             for (int i = 0; i < val.size(); ++i) {
                 int start = val[i].position;
                 int end = val[i].position + val[i].content.length();
@@ -226,10 +234,10 @@ class PatternMatcher {
         }
     }
     
-    void filtResults(parenNum) {
-        results[parenNum]
-        for (int i = 0; i < atoms[parenNum]; ++i) {
-                
+    void filt(int parenNum, int index, vector< vector< pair<int, int> > > &filtResults) {
+        filtResults[parenNum].push_back(results[parenNum][index]);
+        for (int i = 0; i < resultParens[parenNum][index].size(); ++i) {
+            filt(resultParens[parenNum][index][i].first, resultParens[parenNum][index][i].second, filtResults);
         }
     }
 

@@ -43,9 +43,9 @@ class Parser {
             textString += str + "\n";
         }
         createView("Document");
-        views[0].createGroup("text");
+        views[0].createColumn("text");
         while (!textTokenizer.isEnd()) {
-            views[0].findByColName("text").push_back(textTokenizer.getToken());
+            views[0].insert("text", textTokenizer.getToken());
         }
     }
 
@@ -64,7 +64,6 @@ class Parser {
     }
     //执行文本中一条AQL语句
     void aql_stmt() {
-        cout << lexer.getAheadToken().content << endl;
         if (lexer.getAheadToken().type == CREATE) {
             create_stmt();
         } else {
@@ -89,14 +88,15 @@ class Parser {
         view_stmt(name);
         cout << "View: " << name << endl;
         View result = views[viewIndex[name]];
-        for (map<string, int>::iterator it = result.colIndex.begin(); it != result.colIndex.end(); ++it) {
-            cout << it->first << ':' << endl;
-            vector<Token> col = result.groups[it->second];
-            for (int j = 0; j < col.size(); ++j) {
-                Token tok = col[j];
-                cout << tok.content << ": (" << tok.position << ',' << tok.position + tok.content.length() << ')' << endl;
-            }
-        }
+        result.output();
+        //for (map<string, int>::iterator it = result.colIndex.begin(); it != result.colIndex.end(); ++it) {
+            //cout << it->first << ':' << endl;
+            //vector<Token> col = result.groups[it->second];
+            //for (int j = 0; j < col.size(); ++j) {
+                //Token tok = col[j];
+                //cout << tok.content << ": (" << tok.position << ',' << tok.position + tok.content.length() << ')' << endl;
+            //}
+        //}
     }
     //创建View的语句,创建一条新View
     void view_stmt(string name) {
@@ -104,7 +104,6 @@ class Parser {
         //    move();
         //    select_stmt(name);
         //}
-        cout << lexer.getAheadToken().type;
         if (lexer.getAheadToken().type == EXTRACT) {
             move();
             extract_stmt(name);
@@ -126,7 +125,6 @@ class Parser {
         bool cont = true;
         do {
             results.insert(from_item());
-            cout << lexer.getAheadToken().content << endl;
             if (lexer.getAheadToken().type != COMMA) cont = false;
             else move();
         } while (cont);
@@ -135,7 +133,6 @@ class Parser {
     }
     //返回View名和其别名组成的map
     pair<string, string> from_item() {
-        cout << lexer.getAheadToken().content << endl;
         if (lexer.getAheadToken().type != ID) error();
         string realName = lexer.getAheadToken().content;
         move();
@@ -151,7 +148,7 @@ class Parser {
         string regexp;
         string colName;
         map<int, string> nameSpec;
-        PatternMatcher matcher(textString, views[0].groups[0]);
+        PatternMatcher matcher(textString, views[0].getColByName("text"));
 
         if (lexer.getAheadToken().type == REGEX) {
             regex_spec(regexp, viewName, colName, nameSpec);
@@ -173,16 +170,11 @@ class Parser {
         map<string, string> fromList = from_list();
         if (!flag) {
             View &view = views[viewIndex[name]];
-            //cout << "viewName:" << viewName << endl;
-            //cout << "regexp: " << regexp << endl;
-            //cout << "colName: " << colName << endl;
-            //cout << "realName: " << fromList[viewName] << endl;
-            //cout << "index: " << viewIndex[fromList[viewName]] << endl;
             View &fromView = views[viewIndex[fromList[viewName]]];
-            vector<Token> col = fromView.groups[fromView.colIndex[colName]];
+            vector<Token> col = fromView.getColByName(colName);
             vector< vector<int> > spans = findall(regexp.c_str(), textString.c_str());
             for (int j = 0; j < nameSpec.size(); ++j)
-                view.createGroup(nameSpec[j]);
+                view.createColumn(nameSpec[j]);
             for (int i = 0; i < spans.size(); ++i) {
                 for (int j = 0; j < spans[i].size(); j += 2) {
                     Token token = Token(textString.substr(spans[i][j], spans[i][j + 1] - spans[i][j]), ID, 0, 0, spans[i][j]);  
@@ -196,14 +188,12 @@ class Parser {
             for (it = fromList.begin(); it != fromList.end(); ++it) {
                 fromViewsList[it->first] = views[viewIndex[it->second]]; 
             }
-            cout << views.size() << endl;
             View &a = views[0];
             vector< vector< pair<int, int> > > results = matcher.match(a, fromViewsList);
             for (int j = 0; j < nameSpec.size(); ++j) {
-                view.createGroup(nameSpec[j]);
+                view.createColumn(nameSpec[j]);
             }
             for (int i = 0; i < results.size(); ++i) {
-                //cout << "name: " << nameSpec[i] << endl;
                 for (int j = 0; j < results[i].size(); ++j) {
                     if (i != 0) {
                         bool jud = false;
@@ -215,7 +205,6 @@ class Parser {
                         }
                         if (!jud) continue;
                     }
-                    //cout << "content: " << textString.substr(results[i][j].first, results[i][j].second - results[i][j].first) << endl;
                     view.insert(nameSpec[i], Token(textString.substr(results[i][j].first, results[i][j].second - results[i][j].first), ID, 0, 0, results[i][j].first));
                 }   
             }     
@@ -261,7 +250,6 @@ class Parser {
     }
     //返回来源View的别名以及其列名
     map<int, string> name_spec() {
-        cout << lexer.getAheadToken().content << endl;
         if (lexer.getAheadToken().type == AS) {
             lexer.move();
             if (lexer.getAheadToken().type != ID) {
@@ -314,7 +302,6 @@ class Parser {
         int cont = 1;
         while (cont) {
             atom(matcher);
-            cout << lexer.getAheadToken().content << endl;
             if (lexer.getAheadToken().type != BRACKETLEFT && lexer.getAheadToken().type
             != REG && lexer.getAheadToken().type != PARENLEFT) cont = 0;
         }
@@ -333,7 +320,6 @@ class Parser {
             move();
             bool isToken = 0;
             pair<string, string> col;
-            cout << lexer.getAheadToken().content << endl;
             if (lexer.getAheadToken().type == ID) {
                 col = column();
             } else {
