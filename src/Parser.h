@@ -166,6 +166,8 @@ class Parser {
             for (int i = 0; i < spans.size(); ++i) {
                 for (int j = 0; j < spans[i].size(); j += 2) {
                     Token token = Token(textString.substr(spans[i][j], spans[i][j + 1] - spans[i][j]), ID, 0, 0, spans[i][j]);  
+                    cout << j / 2 << endl;
+                    cout << nameSpec.size() << endl;
                     view.insert(nameSpec[j / 2], token);
                 }   
             }

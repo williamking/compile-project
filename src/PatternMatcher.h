@@ -120,11 +120,16 @@ class PatternMatcher {
                 vector< vector<int> > spans = findall(newReg.c_str(), text.c_str());
                 for (int i = 0; i < spans.size(); ++i) {
                     int ep = spans[i][1];
-                    //while (text[ep] == ' ') ++ep;
-                    if (pos != -1)
-                        while (text[pos] == ' ') ++pos;
-                    if (spans[i][0] == pos && pos != -1)
-                        check(stackIndex, j + 1, start, ep);
+                    if (spans[i][0] >= pos && pos != -1) {
+                        bool valid = true;
+                        for (int p = pos; p < spans[i][0]; ++p) 
+                            if (text[p] != ' ' && text[p] != '\n') {
+                                valid = false;
+                                break;
+                            }
+                        if (valid)
+                            check(stackIndex, j + 1, start, ep);
+                    }
                     if (pos == -1) {
                         check(stackIndex, j + 1, spans[i][0], ep); 
                     }
@@ -164,11 +169,15 @@ class PatternMatcher {
             for (int i = 0; i < nums.second - nums.first + 1; ++i) {
                 for (int k = 0 ; k < availables[i].size(); ++k) {
                     int ep = availables[i][k].second;
-                    //while (text[ep] == ' ') ++ep;
-                    if (pos != -1)
-                        while (text[pos] == ' ') ++pos;
-                    if (availables[i][k].first == pos && pos != -1) {
-                        check(stackIndex, j + 1, start, ep);
+                    if (availables[i][k].first >= pos && pos != -1) {
+                        bool valid = true;
+                        for (int p = pos; p < availables[i][k].first; ++p) 
+                            if (text[p] != ' ' && text[p] != '\n') {
+                                valid = false;
+                                break;
+                            }
+                        if (valid)
+                            check(stackIndex, j + 1, start, ep);
                     }
                     if (pos == -1) {
                         check(stackIndex, j + 1, availables[i][k].first, ep);
@@ -219,12 +228,17 @@ class PatternMatcher {
             vector< pair<int, int > > result = results[paren];
             for (int i = 0; i < result.size(); ++i) {
                 int ep = result[i].second;
-                //while (text[ep] == ' ') ++ep;
-                if (pos != -1)
-                    while (text[pos] == ' ') ++pos;
-                if (result[i].first == pos && pos != -1) {
-                    atoms[stackIndex][j].currentAtom = i;
-                    check(stackIndex, j + 1, start, ep);
+                if (result[i].first >= pos && pos != -1) {
+                    bool valid = true;
+                    for (int p = pos; p < result[i].first; ++p) 
+                        if (text[p] != ' ' && text[p] != '\n') {
+                            valid = false;
+                            break;
+                        }
+                    if (valid) {
+                        atoms[stackIndex][j].currentAtom = i;
+                        check(stackIndex, j + 1, start, ep);
+                    }       
                 }
                 if (pos == -1) {
                     atoms[stackIndex][j].currentAtom = i;
