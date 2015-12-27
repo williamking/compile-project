@@ -4,11 +4,10 @@ create view Cap as
   from Document D;
 
 create view Stt as
-  extract regex /Wash(ing)ton|Geor(gia)|Virginia/
+  extract regex /Wash(ing)ton|Georgia|Virginia/
     on D.text
     return group 0 as Stt
     and group 1 as He
-    and group 2 as LL
   from Document D;
 
 create view Loc as

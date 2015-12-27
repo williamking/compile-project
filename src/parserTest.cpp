@@ -3,7 +3,7 @@
 #include <string>
 #include <stdlib.h>
 
-using namespace std;
+using namespace std;a
 
 int main(int argc, char *argv[]) {
 	//cout << "Input the AQL file name and the Article filename" << endl;
