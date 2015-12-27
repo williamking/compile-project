@@ -1,6 +1,7 @@
 #include "Parser.h"
 #include <iostream>
 #include <string>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -9,9 +10,10 @@ int main() {
 	string aql, art;
 	//cin >> aql;
 	//cin >> art;
-	aql = "PerLoc.aql";
-	art = "PerLoc.input";
+	aql = "test.aql";
+	art = "test.txt";
 	Parser parser(aql, art);
 	parser.exec();
+	system("pause");
 	return 0;
 }

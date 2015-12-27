@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <sstream>
 #include "Tokenizer.h"
 
 using namespace std;
@@ -67,18 +68,25 @@ public:
 		cout << "View: " + view_name << endl;
 		cout.setf(ios::left);
 		vector<int> width;
+
+		// Contruct Vector width.
 		for (int i = 0; i < col_numbers; i++) {
 			int max = 0;
 			if (groups[i].size() != 0) {
-				int max = groups[i][0].content.size();
+				Token temp = groups[i][0];
+				string content = getFullContent(temp);
+				int max = content.size();
 			}
 			for (int j = 0; j < groups[i].size(); j++) {
 				if (row_numbers < groups[i].size()) {
 					row_numbers = groups[i].size();
 				}
-				int temp = groups[i][j].content.size();
-				if (temp > max) {
-					max = temp;
+
+				Token temp = groups[i][j];
+				string content = getFullContent(temp);
+				int temp_size = content.size();
+				if (temp_size > max) {
+					max = temp_size;
 				}
 			}
 			max = (getColNameById(i).size() > max) ? getColNameById(i).size() : max;
@@ -130,9 +138,9 @@ public:
 			for (int i = 0; i < col_numbers; i++) {
 				string content = "";
 				if (row_id < groups[i].size()) {
-					content = groups[i][row_id].content;
+					content = getFullContent(groups[i][row_id]);
 				} else {
-					int s = groups[i].back().content.size();
+					int s = getFullContent( groups[i].back() ).size();
 					int j = 0;
 					while (j < s) {
 						content += " ";
@@ -159,7 +167,7 @@ public:
 			}
 		}
 		cout << '+' << endl;
-		cout << row_numbers << " rows in set" << endl;
+		cout << row_numbers << " rows in set" << endl << endl;
     }
 
     // 根据列名返回列
@@ -197,6 +205,26 @@ private:
 
     // View name
     string view_name;
+
+    string getFullContent(Token T) {
+    	int startP = T.position;
+		int endP = T.position + T.content.size();
+		stringstream ss;
+		string s_startP = int2string(startP);
+		string s_endP = int2string(endP);
+
+		string postfix = ":(" + s_startP + ',' + s_endP + ')';
+		string content = T.content + postfix;
+		return content;
+    }
+
+    string int2string(int i) {
+    	stringstream ss;
+    	string s;
+    	ss << i;
+    	ss >> s;
+    	return s;
+    }
 
 };
 

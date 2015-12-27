@@ -1,6 +1,14 @@
-create view Loc as
-  extract pattern (<C.Cap>) /,/ (<S.Stt>)
-  return group 0 as Loc
-    and group 1 as Cap
-    and group 2 as Stt
-  from Cap C, Stt S;
+create view Places as
+  extract regex /China|French|Xinjiang/
+    on D.text
+    as Name
+  from Document D;
+
+create view Do as
+  extract pattern (<P.Name>) /[a-zA-Z]+s/
+  return group 0 as Does
+    and group 1 as Place
+  from Places P;
+
+output view Places;
+output view Do;

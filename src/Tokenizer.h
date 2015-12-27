@@ -74,7 +74,7 @@ public:
             cerr << "Sorry, No such file ~" << endl;
             exit(0);
         } else {
-            cerr << "Open file succeed!" << endl;
+            //cerr << "Open file succeed!" << endl;
         }
 
         std::string str;
@@ -103,7 +103,6 @@ public:
         }
         else {
             peek = EOF;     // flag end
-            exit(0);
         }
     }
 
@@ -180,6 +179,9 @@ public:
     // public Token makeToken(String str, TYPE type);
     //将当前提取的token字符串包装成真正的Token(词法分析使用)
     bool isEnd() {
+        while (peek == ' ' || peek == '\n') {
+            readch();
+        }
         return tokenString.size() <= current;
     }
     //判断文本是否提取到末尾

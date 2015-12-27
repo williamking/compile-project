@@ -26,7 +26,6 @@ public:
             ahead = (*tokenizer).getToken();
             return true;
         } else {
-            cerr << "Well, EOF." << endl;
             return false;
         }
     }

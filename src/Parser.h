@@ -23,12 +23,12 @@ class Parser {
     Lexer lexer;
 
     void error(string errInfo = "") {
-        cout << "Error: " << errInfo << " on: " << lexer.getAheadToken().row << ' ' << lexer.getAheadToken().col << endl;
+        cout << "Error: " << errInfo << " on row:" << lexer.getAheadToken().row << " col:" << lexer.getAheadToken().col << endl;
         exit(0);
     }
     
     void move() {
-    	if (lexer.move() == false) error("");
+    	if (lexer.move() == false) error("The statement is not completed.");
     }
     //语法分析错误时的处理
 
@@ -51,7 +51,7 @@ class Parser {
     }
 
     void createView(string name) {
-        views.push_back(View());
+        views.push_back(View(name));
         viewIndex[name] = views.size() - 1;
     }
     //创建一个新的View
@@ -59,9 +59,6 @@ class Parser {
     void exec() {
         while (lexer.move())
 		 	aql_stmt();
-        //for (int i = 0; i < views.size(); ++i) {
-        //    views[i].output();
-       // }
     }
     //执行文本中一条AQL语句
     void aql_stmt() {
@@ -69,7 +66,7 @@ class Parser {
             create_stmt();
         } else {
             if (lexer.getAheadToken().type == OUTPUT) {
-                //output_stmt();
+                output_stmt();
             } else {
                 error("Neither create or output statement.");
             }
@@ -87,40 +84,29 @@ class Parser {
         if (lexer.getAheadToken().type != AS) error("Lack key word of 'AS'");
         move();
         view_stmt(name);
-        cout << "View: " << name << endl;
-        View result = views[viewIndex[name]];
-        result.output();
-        //for (map<string, int>::iterator it = result.colIndex.begin(); it != result.colIndex.end(); ++it) {
-            //cout << it->first << ':' << endl;
-            //vector<Token> col = result.groups[it->second];
-            //for (int j = 0; j < col.size(); ++j) {
-                //Token tok = col[j];
-                //cout << tok.content << ": (" << tok.position << ',' << tok.position + tok.content.length() << ')' << endl;
-            //}
-        //}
     }
     //创建View的语句,创建一条新View
     void view_stmt(string name) {
         //if (lexer.getAheadToken().type == SELECT) {
         //    move();
         //    select_stmt(name);
+        //    return; 
         //}
         if (lexer.getAheadToken().type == EXTRACT) {
             move();
             extract_stmt(name);
+            return;
         }
         error("You should use key word 'select or 'extract' to deal with a view.");
-    }   
-    //传入参数为创建的View名称
-    //void output_stmt();
-    //map<string, string> alias();
+    }
+    map<string, string> alias();
     //返回View和其别名的绑定
-    //void select_stmt(string name);
+    void select_stmt(string name);
     //从已有的View中选择列插入到创建的新View中(参数为操作的View的名称)
-    //map< string, pair<string,string> > select_list();
+    map< string, pair<string,string> > select_list();
     //返回要组成新View的内容的多个列和其别名组成的map
     //map的key为选择的列并入到新View中的列名,value为选择的View别名和其列名组成的pair
-    //pair< string, pair<string, string> > select_item();
+    pair< string, pair<string, string> > select_item();
     //返回select_list中map的一个value
     map<string, string> from_list() {
         map <string, string> results;
@@ -221,6 +207,10 @@ class Parser {
             return;
         }   
         regexp = lexer.getAheadToken().content;
+        int p = 0, q = regexp.length() - 1;
+        //while (regexp[p] == ' ' && p < q) ++p;
+        //while (q > p && regexp[q] == ' ') --q;
+        //regexp = regexp.substr(p, q-p+1);
         move();
         if (lexer.getAheadToken().type != ON) {
             error("Expected word 'on'.");
@@ -267,7 +257,7 @@ class Parser {
             if (lexer.getAheadToken().type != GROUP) error("Expected a word 'group'.");
             return group_spec();
         } 
-        error("Expected a word 'as' or 'return'.")
+        error("Expected a word 'as' or 'return'.");
     }
     //若是为as ID,则返回只有一个pair<0, ID>的map,否则返回 group_spec
     map<int, string> group_spec() {
@@ -282,7 +272,7 @@ class Parser {
             lexer.move();
             if (lexer.getAheadToken().type != AS) error("Expected wo");
             lexer.move();
-            if (lexer.getAheadToken().type != ID) error();
+            if (lexer.getAheadToken().type != ID) error("Expected name of column.");
             string viewname = lexer.getAheadToken().content;
             list[num] = viewname;
             move();
@@ -301,7 +291,7 @@ class Parser {
     void pattern_expr(PatternMatcher &matcher) {
         //cout << lexer.getAheadToken().content << endl;
         if (lexer.getAheadToken().type != BRACKETLEFT && lexer.getAheadToken().type
-           != REG && lexer.getAheadToken().type != PARENLEFT) error();
+           != REG && lexer.getAheadToken().type != PARENLEFT) error("Expected an atom in the pattern mode.");
         int cont = 1;
         while (cont) {
             atom(matcher);
@@ -314,7 +304,7 @@ class Parser {
             move();
             matcher.insertSubMatcher();
             pattern_expr(matcher);
-            if (lexer.getAheadToken().type != PARENRIGHT) error();
+            if (lexer.getAheadToken().type != PARENRIGHT) error("Lack a right paren.");
             move();
             matcher.popSubMatcher();
             return;
@@ -326,28 +316,28 @@ class Parser {
             if (lexer.getAheadToken().type == ID) {
                 col = column();
             } else {
-                if (lexer.getAheadToken().type != TOKEN) error();
+                if (lexer.getAheadToken().type != TOKEN) error("Expected a word 'token'");
                 isToken = 1;
                 move();
             }
-            if (lexer.getAheadToken().type != BRACKETRIGHT) error();
+            if (lexer.getAheadToken().type != BRACKETRIGHT) error("Lack a right bracket.");
             move();
             int bot = 1, top = 1;
             if (lexer.getAheadToken().type == BRACESLEFT) {
                 move();
-                if (lexer.getAheadToken().type != NUM) error();
+                if (lexer.getAheadToken().type != NUM) error("Expected a number.");
                 stringstream ss;
                 ss << lexer.getAheadToken().content;
                 ss >> bot;
                 move();
-                if (lexer.getAheadToken().type != COMMA) error();
+                if (lexer.getAheadToken().type != COMMA) error("Expected a comma.");
                 move();
-                if (lexer.getAheadToken().type != NUM) error();
+                if (lexer.getAheadToken().type != NUM) error("Expected a number.");
                 stringstream st;
                 st << lexer.getAheadToken().content;
                 st >> top;
                 move();
-                if (lexer.getAheadToken().type != BRACESRIGHT) error();
+                if (lexer.getAheadToken().type != BRACESRIGHT) error("Expected a right braces");
                 move();
             }
             if (isToken) matcher.insertToken(bot, top);
@@ -361,22 +351,41 @@ class Parser {
             lexer.move();
             if (lexer.getAheadToken().type == BRACESLEFT) {
                 move();
-                if (lexer.getAheadToken().type != NUM) error();
+                if (lexer.getAheadToken().type != NUM) error("Expected a number");
                 stringstream ss;
                 ss << lexer.getAheadToken().content;
                 ss >> bot;
                 move();
-                if (lexer.getAheadToken().type != NUM) error();
+                if (lexer.getAheadToken().type != NUM) error("Expected a number");
                 ss << lexer.getAheadToken().content;
                 ss >> top;
                 move();
-                if (lexer.getAheadToken().type != BRACESRIGHT) error();
+                if (lexer.getAheadToken().type != BRACESRIGHT) error("Expected a right braces");
                 move();
             } 
             matcher.insertReg(regexp, bot, top);
         } 
     }
-    //void pattern_group();
-    //以上的函数均为非终结符的匹配函数
+
+    //传入参数为创建的View名称
+    void output_stmt() {
+        move();
+        if (lexer.getAheadToken().type != VIEW) {
+            error("The target of OUTPUT should be a VIEW. Please check your code.");
+        }
+        move();
+        if (lexer.getAheadToken().type != ID) {
+            error("The name of the view should only have letters.");
+        }
+        string view_name = lexer.getAheadToken().content;
+        move();
+        if (lexer.getAheadToken().type == SEMICOLON) {
+        } else {
+            error("No SEMICOLON';' Found.");
+        }
+        // Output
+        View result = views[viewIndex[view_name]];
+        result.output();
+    }
 
 };
