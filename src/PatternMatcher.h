@@ -111,32 +111,66 @@ class PatternMatcher {
             resultParens[stackIndex].push_back(pars);
             return;
         }
+        // if (atoms[stackIndex][j].type == 0) {
+        //     string regexp = atoms[stackIndex][j].regexp;
+        //     pair<int, int> nums = atoms[stackIndex][j].nums;
+        //     string newReg = "";
+        //     for (int i = 0; i < nums.first; ++i) newReg += regexp;
+        //     vector<int> availablePos;
+        //     availablePos.push_back(pos); 
+        //     for (int k = nums.first; k <= nums.second; ++k) {
+        //         vector< vector<int> > spans = findall(newReg.c_str(), text.c_str());
+        //         for (int i = 0; i < spans.size(); ++i) {
+        //             int ep = spans[i][1];
+        //             if (spans[i][0] >= pos && pos != -1) {
+        //                 bool valid = true;
+        //                 for (int p = pos; p < spans[i][0]; ++p) 
+        //                     if (text[p] != ' ' && text[p] != '\n') {
+        //                         valid = false;
+        //                         break;
+        //                     }
+        //                 if (valid)
+        //                     check(stackIndex, j + 1, start, ep);
+        //             }
+        //             if (pos == -1) {
+        //                 check(stackIndex, j + 1, spans[i][0], ep); 
+        //             }
+        //         }
+        //         newReg += regexp;
+        //     }
+        //     return;
+        // }
         if (atoms[stackIndex][j].type == 0) {
-            string regexp = atoms[stackIndex][j].regexp;
-            pair<int, int> nums = atoms[stackIndex][j].nums;
-            string newReg = "";
-            for (int i = 0; i < nums.first; ++i) newReg += regexp;
-            for (int k = nums.first; k <= nums.second; ++k) {
-                vector< vector<int> > spans = findall(newReg.c_str(), text.c_str());
-                for (int i = 0; i < spans.size(); ++i) {
-                    int ep = spans[i][1];
-                    if (spans[i][0] >= pos && pos != -1) {
-                        bool valid = true;
-                        for (int p = pos; p < spans[i][0]; ++p) 
+        	string regexp = atoms[stackIndex][j].regexp;
+        	pair<int, int> nums = atoms[stackIndex][j].nums;
+        	vector< vector<int> > spans = findall(regexp.c_str(), text.c_str());
+        	for (int i = 0; i < spans.size() - nums.first + 1; ++i) {
+        		int ep = pos;
+        		for (int k = 0; k < nums.second; ++k) {
+        			if (spans[i + k][0] >= ep || ep != -1) {
+        				bool valid = true;
+        				for (int p = ep; p < spans[i + k][0]; ++p) {
                             if (text[p] != ' ' && text[p] != '\n') {
                                 valid = false;
                                 break;
-                            }
-                        if (valid)
-                            check(stackIndex, j + 1, start, ep);
-                    }
-                    if (pos == -1) {
-                        check(stackIndex, j + 1, spans[i][0], ep); 
-                    }
-                }
-                newReg += regexp;
-            }
-            return;
+                            }        					
+        				}
+        				if (valid) {
+        					ep = spans[i + k][1];
+        					if (k >= nums.first - 1)
+        						check(stackIndex, j + 1, start, ep);
+        				} else {
+        					break;
+        				}
+        			}
+        			if (ep == -1) {
+        				ep = spans[i + k][1];
+        				if (start == -1) start = spans[i + k][0];
+        				if (k >= nums.first - 1)
+        					check(stackIndex, j + 1, start, ep);
+        			}
+        		}
+        	}
         }
         if (atoms[stackIndex][j].type == 1) {
             string viewName = atoms[stackIndex][j].viewName;

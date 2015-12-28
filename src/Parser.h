@@ -59,7 +59,6 @@ class Parser {
     void exec() {
         while (lexer.move()) {
 		 	aql_stmt();
-            cout << "hehe" << endl;
         }    
     }
     //执行文本中一条AQL语句
@@ -166,7 +165,7 @@ class Parser {
             for (int j = 0; j < nameSpec.size(); ++j)
                 view.createColumn(nameSpec[j]);
             for (int i = 0; i < spans.size(); ++i) {
-                for (int j = 0; j < spans[i].size(); j += 2) {
+                for (int j = 0; j / 2 < nameSpec.size(); j += 2) {
                 	if (spans[i][j] < 0 || spans[i][j] >= textString.length()) continue;
                     Token token = Token(textString.substr(spans[i][j], spans[i][j + 1] - spans[i][j]), ID, 0, 0, spans[i][j]);  
                     view.insert(nameSpec[j / 2], token);

@@ -1,10 +1,10 @@
 create view Subject as
-  extract regex /China|French|Beijing|Xinjiang|it|he|she|this|that/
+  extract regex /(China|French|Beijing|Xinjiang|it|he|she|this|that)/
     on D.text as Sub
   from Document D;
 
 create view Verb as
-  extract regex / ([a-zA-Z]+s|[a-zA-Z]ed) /
+  extract regex /([a-zA-Z]+s|[a-zA-Z]+ed)/
     on D.text
     return group 0 as Ver
     and group 1 as Subver
@@ -18,7 +18,7 @@ create view Object as
 
 
 create view Thing as
-  extract pattern (<S.Sub>) <Token>{0,2} (<V.Subver>) <Token>{1,2} (<O.Obj>)
+  extract pattern (<S.Sub>) <Token>{0,2} (<V.Subver>) <Token>{0,2} (<O.Obj>)
   return group 0 as The
     and group 1 as Sub
     and group 2 as Ver
