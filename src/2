@@ -4,26 +4,18 @@ create view Subject as
   from Document D;
 
 create view Verb as
-  extract regex / ([a-zA-Z]+s|[a-zA-Z]ed) /
+  extract regex /[a-zA-Z]+s|[a-zA-Z]ed/
     on D.text
     return group 0 as Ver
-    and group 1 as Subver
   from Document D;
-
-create view Object as
-  extract regex /[a-zA-Z]+/
-    on D.text
-    return group 0 as Obj
-  from Document D;
-
 
 create view Thing as
-  extract pattern (<S.Sub>) <Token>{0,2} (<V.Subver>) <Token>{1,2} (<O.Obj>)
+  extract pattern (<S.Sub>) <Token>{0,2} (<V.Ver>) <Token>{1,2} (<S.Sub>)
   return group 0 as The
     and group 1 as Sub
     and group 2 as Ver
     and group 3 as Obj
-  from Subject S, Verb V, Object O;
+  from Subject S, Verb V;
 
 output view Subject;
 output view Verb;

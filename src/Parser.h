@@ -57,8 +57,10 @@ class Parser {
     //创建一个新的View
 
     void exec() {
-        while (lexer.move())
+        while (lexer.move()) {
 		 	aql_stmt();
+            cout << "hehe" << endl;
+        }    
     }
     //执行文本中一条AQL语句
     void aql_stmt() {

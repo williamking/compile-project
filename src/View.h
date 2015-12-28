@@ -174,7 +174,7 @@ public:
     vector<Token>& getColByName(string name) {
     	if (col_id_map.count(name) <= 0) {
     		cout << endl;
-    		cerr << "Query Error: Column Name: \"" << name << "\" Doesn't Exist!" << endl;
+    		cerr << "Query Error: Column Name: \"" << name << "\" Doesn't Exist in View: " << view_name << '!' << endl;
     		cerr << "Program Exits." << endl;
     		cout << endl;
     		exit(0);
