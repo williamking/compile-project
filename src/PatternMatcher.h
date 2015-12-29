@@ -91,11 +91,14 @@ class PatternMatcher {
         for (int i = 0; i < results[0].size(); ++i) {
             filtResults[0].push_back(results[0][i]);
         }
+        //cout << filtResults[0].size() << endl;
+        //cout << filtResults[0][0].first << endl;
+        //cout << filtResults[0][0].second<< endl; 
         for (int j = 0; j < resultParens[0].size(); ++j) {
             for (int k = 0; k < resultParens[0][j].size(); ++k) {
                 filt(resultParens[0][j][k].first, resultParens[0][j][k].second, filtResults);
             }
-        }
+        }       
         return filtResults;
     }
     //以栈的方式保存括号层次关系,j表示第几个Atom,start表示文章中匹配的起始位置,pos为当前匹配的位置 
@@ -116,43 +119,21 @@ class PatternMatcher {
             resultParens[stackIndex].push_back(pars);
             return;
         }
-        // if (atoms[stackIndex][j].type == 0) {
-        //     string regexp = atoms[stackIndex][j].regexp;
-        //     pair<int, int> nums = atoms[stackIndex][j].nums;
-        //     string newReg = "";
-        //     for (int i = 0; i < nums.first; ++i) newReg += regexp;
-        //     vector<int> availablePos;
-        //     availablePos.push_back(pos); 
-        //     for (int k = nums.first; k <= nums.second; ++k) {
-        //         vector< vector<int> > spans = findall(newReg.c_str(), text.c_str());
-        //         for (int i = 0; i < spans.size(); ++i) {
-        //             int ep = spans[i][1];
-        //             if (spans[i][0] >= pos && pos != -1) {
-        //                 bool valid = true;
-        //                 for (int p = pos; p < spans[i][0]; ++p) 
-        //                     if (text[p] != ' ' && text[p] != '\n') {
-        //                         valid = false;
-        //                         break;
-        //                     }
-        //                 if (valid)
-        //                     check(stackIndex, j + 1, start, ep);
-        //             }
-        //             if (pos == -1) {
-        //                 check(stackIndex, j + 1, spans[i][0], ep); 
-        //             }
-        //         }
-        //         newReg += regexp;
-        //     }
-        //     return;
-        // }
         if (atoms[stackIndex][j].type == 0) {
         	string regexp = atoms[stackIndex][j].regexp;
         	pair<int, int> nums = atoms[stackIndex][j].nums;
         	vector< vector<int> > spans = findall(regexp.c_str(), text.c_str());
+        	//cout << spans.size() << endl;
+        	if (nums.first == 0) {
+                nums.first = 1;
+                check(stackIndex, j + 1, start, pos);
+            }
         	for (int i = 0; i < spans.size() - nums.first + 1; ++i) {
         		int ep = pos;
+        		int es = start;
         		for (int k = 0; k < nums.second; ++k) {
-        			if (spans[i + k][0] >= ep || ep != -1) {
+                    if (i + k >= spans.size()) break;
+        			if (spans[i + k][0] >= ep && ep != -1) {
         				bool valid = true;
         				for (int p = ep; p < spans[i + k][0]; ++p) {
                             if (text[p] != ' ' && text[p] != '\n') {
@@ -170,9 +151,9 @@ class PatternMatcher {
         			}
         			if (ep == -1) {
         				ep = spans[i + k][1];
-        				if (start == -1) start = spans[i + k][0];
+        				if (es == -1) es = spans[i + k][0];
         				if (k >= nums.first - 1)
-        					check(stackIndex, j + 1, start, ep);
+        					check(stackIndex, j + 1, es, ep);
         			}
         		}
         	}
@@ -195,8 +176,12 @@ class PatternMatcher {
                 int start = val[i].position;
                 int end = val[i].position + val[i].content.length();
                 int k;
+                //cout << "bot: " << nums.first << endl;
+                //cout << "start: " << start;
+                //cout << "end: " << endl;
                 for (k = 2; k <= nums.first; ++k) {
                 	if (val[i + k - 1].position >= end) {
+                        //cout << "pend: " << end << endl;
                 		bool neighbor = true;
                 		for (int p = end; p < val[i + k - 1].position; ++p) {
                 			if (text[p] != ' ' && text[p] != '\n') {
@@ -208,10 +193,6 @@ class PatternMatcher {
                 } 
                 if (k == nums.first + 1) {
                     for (k = nums.first; k <= nums.second; ++k) {
-                    	if (pos == -1 && k == 1) {
-                    		cout << "end: " << end << endl;
-							cout << "pos: " << val[i + k].position << endl; 
-                    	} 
                         availables[k - nums.first].push_back(make_pair(start, end));
                         if (val[i + k].position >= end) {
                 			bool neighbor = true;
@@ -259,32 +240,30 @@ class PatternMatcher {
             	bot = 1;
             } 
             for (i = 0; i < document.size() - bot; ++i) {
-                if (document[i + 1].position >= pos && pos != -1) {
-                	from = document[i + 1].position;
-                    break;
+                if (document[i].position >= pos && pos != -1) {
+                	from = document[i].position;
                 }
                 if (pos == -1) {
-                    from = document[i + 1].position;
-                    break;
+                    from = document[i].position;
                 }
-            }
-            if (from != -1) {
-                if (start == -1) {
-                    for (int k = bot; k <= top; ++k) {
-                        if (i + k >= document.size()) break;
-                        int ep = document[i + k].position + document[i + k].content.length();
-                        //while (text[ep] == ' ') ++ep;
-                        if (i + k < document.size()) {
-                            check(stackIndex, j + 1, from, ep);
+                if (from != -1) {
+                    if (start == -1) {
+                        for (int k = bot; k <= top; ++k) {
+                            if (i + k >= document.size()) break;
+                            int ep = document[i + k - 1].position + document[i + k - 1].content.length();
+                            //while (text[ep] == ' ') ++ep;
+                            if (i + k - 1< document.size()) {
+                                check(stackIndex, j + 1, from, ep);
+                            }
                         }
-                    }
-                } else {
-                    for (int k = bot; k <= top; ++k) {
-                    	if (i + k >= document.size()) break;
-                        int ep = document[i + k].position + document[i + k].content.length();
-                        //while (text[ep] == ' ') ++ep;
-                        if (i + k < document.size()) {
-                            check(stackIndex, j + 1, start, ep);
+                    } else {
+                        for (int k = bot; k <= top; ++k) {
+                        	if (i + k - 1>= document.size()) break;
+                            int ep = document[i + k - 1].position + document[i + k - 1].content.length();
+                            //while (text[ep] == ' ') ++ep;
+                            if (i + k - 1 < document.size()) {
+                                check(stackIndex, j + 1, start, ep);
+                            }
                         }
                     }
                 }
@@ -323,6 +302,9 @@ class PatternMatcher {
     
     void filt(int parenNum, int index, vector< vector< pair<int, int> > > &filtResults) {
         filtResults[parenNum].push_back(results[parenNum][index]);
+        //cout << filtResults[parenNum].size() << endl;
+        //cout << filtResults[1][0].first << endl;
+        //cout << filtResults[1][0].second << endl;
         for (int i = 0; i < resultParens[parenNum][index].size(); ++i) {
             filt(resultParens[parenNum][index][i].first, resultParens[parenNum][index][i].second, filtResults);
         }

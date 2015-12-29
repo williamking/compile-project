@@ -137,9 +137,13 @@ public:
 		for (int row_id = 0; row_id < row_numbers; row_id++) {
 			for (int i = 0; i < col_numbers; i++) {
 				string content = "";
+				//cout << row_id << endl;
 				if (row_id < groups[i].size()) {
 					content = getFullContent(groups[i][row_id]);
 				} else {
+                    cout << groups[i].size() << endl;
+                    cout << i << endl;
+                    Token pp = groups[i].back();
 					int s = getFullContent( groups[i].back() ).size();
 					int j = 0;
 					while (j < s) {
@@ -207,7 +211,9 @@ private:
     string view_name;
 
     string getFullContent(Token T) {
-    	//if (T.content.size() == 0) return T.content; 
+    	if (T.content.length() == 0) return "Empty";
+    	for (int i = 0; i < T.content.length(); ++i)
+    	   if (T.content[i] == '\n') T.content[i] = ' ';
     	int startP = T.position;
 		int endP = T.position + T.content.size();
 		stringstream ss;

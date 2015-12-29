@@ -185,16 +185,16 @@ class Parser {
             }
             for (int i = 0; i < results.size(); ++i) {
                 for (int j = 0; j < results[i].size(); ++j) {
-                    if (i != 0) {
-                        bool jud = false;
-                        for (int k = 0; k < results[0].size(); ++k) {
-                            if ((results[0][k].first <= results[i][j].first) && (results[i][j].second <= results[0][k].second)) {
-                                jud = true;
-                                break;
-                            }
-                        }
-                        if (!jud) continue;
-                    }
+                    //if (i != 0) {
+                        //bool jud = false;
+                        //for (int k = 0; k < results[0].size(); ++k) {
+                            //if ((results[0][k].first <= results[i][j].first) && (results[i][j].second <= results[0][k].second)) {
+                                //jud = true;
+                                //break;
+                            //}
+                        //}
+                        //if (!jud) continue;
+                    //}
                     view.insert(nameSpec[i], Token(textString.substr(results[i][j].first, results[i][j].second - results[i][j].first), ID, 0, 0, results[i][j].first));
                 }   
             }     
@@ -357,6 +357,8 @@ class Parser {
                 stringstream ss;
                 ss << lexer.getAheadToken().content;
                 ss >> bot;
+                move();
+                if (lexer.getAheadToken().type != COMMA) error("Expected a comma.");
                 move();
                 if (lexer.getAheadToken().type != NUM) error("Expected a number");
                 ss << lexer.getAheadToken().content;
