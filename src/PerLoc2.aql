@@ -18,13 +18,11 @@ create view Object as
 
 
 create view Thing as
-  extract pattern (<S.Sub>) <Token>{0,2} (<V.Subver>) <Token>{0,2} (<O.Obj>)
+  extract pattern <Token>{1, 2} (<S.Sub>{0,1}) <Token>{0,2} (<V.Subver>)
   return group 0 as The
     and group 1 as Sub
     and group 2 as Ver
     and group 3 as Obj
   from Subject S, Verb V, Object O;
 
-output view Subject;
-output view Verb;
 output view Thing;

@@ -102,12 +102,17 @@ class PatternMatcher {
     void check(int stackIndex, int j, int start, int pos) {
         if (j >= atoms[stackIndex].size()) {
             vector< pair<int, int> > pars;
-            results[stackIndex].push_back(make_pair(start, pos));
+            if (pos == -1)
+            	results[stackIndex].push_back(make_pair(0, 0));
+            else
+            	results[stackIndex].push_back(make_pair(start, pos));
+            //cout << "start: " << start << ' ' << "pos: " << pos << endl;
             for (int i = 0; i < atoms[stackIndex].size(); ++i) {
                 if (atoms[stackIndex][i].type == 3) {
                     pars.push_back(make_pair(atoms[stackIndex][i].parenNum, atoms[stackIndex][i].currentAtom));
                 }
             }
+            //if (stackIndex == 3) cout << text.substr(start, pos - start) << endl;
             resultParens[stackIndex].push_back(pars);
             return;
         }
@@ -181,22 +186,46 @@ class PatternMatcher {
             vector< vector< pair<int, int> > > availables; 
             for (int i = nums.first; i <= nums.second; ++i)
                 availables.push_back(vector< pair<int, int> >());
+    		if (nums.first == 0) {
+    			check(stackIndex, j + 1, start, pos);
+    			nums.first = 1;
+    		}
+    		if (nums.first > nums.second) return;
             for (int i = 0; i < val.size(); ++i) {
                 int start = val[i].position;
                 int end = val[i].position + val[i].content.length();
                 int k;
                 for (k = 2; k <= nums.first; ++k) {
-                    if (val[i + k - 1].position == end)
-                        end = val[i + k - 1].position + val[i + k -1].position + val[i + k - 1].content.length();
-                    else
-                        break;
+                	if (val[i + k - 1].position >= end) {
+                		bool neighbor = true;
+                		for (int p = end; p < val[i + k - 1].position; ++p) {
+                			if (text[p] != ' ' && text[p] != '\n') {
+                				neighbor = false;
+                			}
+                		}
+                		if (neighbor) end = val[i + k - 1].position + val[i + k - 1].content.length(); else break;
+                	} else break;
                 } 
                 if (k == nums.first + 1) {
                     for (k = nums.first; k <= nums.second; ++k) {
+                    	if (pos == -1 && k == 1) {
+                    		cout << "end: " << end << endl;
+							cout << "pos: " << val[i + k].position << endl; 
+                    	} 
                         availables[k - nums.first].push_back(make_pair(start, end));
-                        if (val[i + k].position == end) {
-                            end = val[i + k - 1].position + val[i + k - 1].content.length();
-                        }
+                        if (val[i + k].position >= end) {
+                			bool neighbor = true;
+                			for (int p = end; p < val[i + k - 1].position; ++p) {
+                				if (text[p] != ' ' && text[p] != '\n') {
+                					neighbor = false;
+                				}
+                			}
+                        	if (neighbor) {
+                            	end = val[i + k - 1].position + val[i + k - 1].content.length();
+                        	} else {
+                        		break;
+                        	}
+                		} else break;
                     }
                 }
             }
@@ -225,9 +254,13 @@ class PatternMatcher {
             int bot = atoms[stackIndex][j].nums.first;
             int top = atoms[stackIndex][j].nums.second;
             int i;
+            if (bot == 0) {
+            	check(stackIndex, j + 1, start ,pos);
+            	bot = 1;
+            } 
             for (i = 0; i < document.size() - bot; ++i) {
                 if (document[i + 1].position >= pos && pos != -1) {
-                    from = document[i + 1].position;
+                	from = document[i + 1].position;
                     break;
                 }
                 if (pos == -1) {
@@ -237,7 +270,7 @@ class PatternMatcher {
             }
             if (from != -1) {
                 if (start == -1) {
-                    for (int k = bot; k < top; ++k) {
+                    for (int k = bot; k <= top; ++k) {
                         if (i + k >= document.size()) break;
                         int ep = document[i + k].position + document[i + k].content.length();
                         //while (text[ep] == ' ') ++ep;
@@ -246,7 +279,8 @@ class PatternMatcher {
                         }
                     }
                 } else {
-                    for (int k = bot; k < top; ++k) {
+                    for (int k = bot; k <= top; ++k) {
+                    	if (i + k >= document.size()) break;
                         int ep = document[i + k].position + document[i + k].content.length();
                         //while (text[ep] == ' ') ++ep;
                         if (i + k < document.size()) {
@@ -262,7 +296,7 @@ class PatternMatcher {
             vector< pair<int, int > > result = results[paren];
             for (int i = 0; i < result.size(); ++i) {
                 int ep = result[i].second;
-                if (result[i].first >= pos && pos != -1) {
+                if (result[i].first >= pos && pos != -1 && !(result[i].first == 0 && result[i].second == 0)) {
                     bool valid = true;
                     for (int p = pos; p < result[i].first; ++p) 
                         if (text[p] != ' ' && text[p] != '\n') {
@@ -272,11 +306,16 @@ class PatternMatcher {
                     if (valid) {
                         atoms[stackIndex][j].currentAtom = i;
                         check(stackIndex, j + 1, start, ep);
-                    }       
+                    }
+                    continue;
                 }
-                if (pos == -1) {
+                if (pos == -1 && !(result[i].first == 0 && result[i].second == 0)) {
                     atoms[stackIndex][j].currentAtom = i;
                     check(stackIndex, j + 1, result[i].first, ep);
+                }
+                if (result[i].first == 0 && result[i].second == 0) {
+                	atoms[stackIndex][j].currentAtom = i;
+                    check(stackIndex, j + 1, start, pos); 
                 }
             }
         }

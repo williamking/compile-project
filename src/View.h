@@ -207,6 +207,7 @@ private:
     string view_name;
 
     string getFullContent(Token T) {
+    	//if (T.content.size() == 0) return T.content; 
     	int startP = T.position;
 		int endP = T.position + T.content.size();
 		stringstream ss;
