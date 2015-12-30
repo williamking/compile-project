@@ -1,0 +1,48 @@
+create view CapWords as
+    extract regex /[A-Z][a-zA-Z]*/
+    on D.text as Word
+    from Document D;
+
+create view TheWords as
+    extract regex /[Tt]he/
+    on D.text as Word
+    from Document D;
+
+create view OneFamous as
+    extract pattern (<T.Word>) (/[A-Z][a-zA-Z]*/) (<Token>{0, 1}) (<C.Word>)
+        return group 0 as FamousPlace and
+               group 1 as TheWord and
+               group 2 as CapWord1 and
+               group 3 as CapWord2 and
+               group 4 as CapWord4 and
+        from CapWords C, TheWords T;
+
+create view TwoFamous as
+    extract pattern (<C.Word>) (<C.Word>)
+        return group 0 as FamousPlace
+           and group 1 as One
+           and group 2 as Two
+        from CapWords C;
+
+create view ThreeFamous as
+    extract pattern (<C.Word>) (<C.Word>) /'s/ (<C.Word>)
+        return group 0 as FamousPlace and
+               group 1 as Cap1 and
+               group 2 as Cap2 and
+               group 3 as Cap3
+        from CapWords C;
+
+output view CapWords;
+output view TheWords;
+output view OneFamous;
+output view TwoFamous;
+
+create view Famous as
+    select (<One.FamousPlace>) (<Two.FamousPlace>) (<Three.FamousPlace>)
+        return group 0 as TheFamousPlace and
+               group 1 as OneFamousPlace and
+               group 2 as TwoFamousPlace and
+               group 3 as ThreeFamousPlace
+        from OneFamous One, TwoFamous Tow, ThreeFamous Three;
+
+output view Famous;

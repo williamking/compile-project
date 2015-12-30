@@ -45,8 +45,9 @@ class Parser {
         }
         createView("Document");
         views[0].createColumn("text");
+        int i = 0;
         while (!textTokenizer.isEnd()) {
-            views[0].insert("text", textTokenizer.getToken());
+            views[0].insert("text", textTokenizer.getTextToken());
         }
     }
 
@@ -272,7 +273,7 @@ class Parser {
             int num;
             ss >> num; //提取num token
             lexer.move();
-            if (lexer.getAheadToken().type != AS) error("Expected wo");
+            if (lexer.getAheadToken().type != AS) error("Expected word as");
             lexer.move();
             if (lexer.getAheadToken().type != ID) error("Expected name of column.");
             string viewname = lexer.getAheadToken().content;

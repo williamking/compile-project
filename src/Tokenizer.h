@@ -58,10 +58,10 @@ class Token {
     //token文本
         TYPE type;
     //token类型
-        int row;
-        int col;
+        long row;
+        long col;
     // //在文本的行列位置
-        int position;
+        long position;
 };
 
 class Tokenizer {
@@ -105,6 +105,26 @@ public:
             peek = EOF;     // flag end
         }
     }
+    
+    Token getTextToken() {
+        while (peek == ' ' || peek == '\n') {
+            readch();
+        }
+        int pos = current - 1;
+        if (isdigit(peek)) {
+            std::string s = "";
+            do {
+                s.append(1u, peek); readch();
+            } while (isdigit(peek));
+            return Token(s, NUM, 0, 0, pos);
+        } else {
+             std::string s = "";
+            do {
+                s.append(1u, peek); readch();
+            } while (!(isdigit(peek)) && peek != ' ' && peek != '\n');
+            return Token(s, ID, 0, 0, pos);           
+        }
+    }
 
     Token getToken() {
         while (peek == ' ' || peek == '\n') {
@@ -114,14 +134,14 @@ public:
         int tok_col = col - 1;
         int tok_row = row;
 
-		int pos = current - 1;
+        int pos = current - 1;
 
         if (isalpha(peek)) {
             std::string s = "";
             do {
                 s.append(1u, peek);
                 readch();
-            } while (isalpha(peek));
+            } while (isalpha(peek) || isdigit(peek));
             if (peek == '\n') {
                 tok_row = row - 1;
             }
