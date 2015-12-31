@@ -1,14 +1,55 @@
-create view Places as
-  extract regex /China|French|Xinjiang/
-    on D.text
-    as Name
-  from Document D;
+create view Notes as
+	extract regex /(\[)[0-9]+(\])/
+		on D.text as notes
+	from Document D;
 
-create view Do as
-  extract pattern (<P.Name>) /[a-zA-Z]+s/
-  return group 0 as Does
-    and group 1 as Place
-  from Places P;
+create view AppleInc as
+	extract regex /Apple/
+		on D.text as appleinc
+	from Document D;
 
-output view Places;
-output view Do;
+create view Products as
+	extract regex /iPhone|Apple( )TV|iPod( )Touch|iPad|iCloud/
+		on D.text as products
+	from Document D;
+
+create view Year as
+	extract regex /(2)(0)[0-9][0-9]/
+		on D.text as year
+	from Document D;
+
+create view Month as
+	extract regex /January|February|March|April|May|June|July|August|September|October|November|December/
+		on D.text as month
+	from Document D;
+
+create view Date as
+	extract pattern (<M.month>) (<Y.year>)
+		return group 0 as date
+			and group 1 as month
+			and group 2 as year
+	from Month M, Year Y;
+
+create view AppleEvents as
+	extract pattern (<D.date>) <Token>{1,4} (<A.appleinc>) <Token>{1,40} (<P.products>)
+		return group 0 as event
+			and group 1 as date
+			and group 2 as company
+			and group 3 as product
+	from Date D, AppleInc A, Products P;
+	
+create view AppleEvent2 as
+    select A.event, A.date, A.company as Com
+    from AppleEvents A;
+
+output view Notes;
+output view AppleInc;
+output view Products;
+
+output view Year;
+output view Month;
+output view Date;
+
+output view AppleEvents;
+
+output view AppleEvent2;

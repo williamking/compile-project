@@ -120,14 +120,16 @@ class Parser {
     	if (lexer.getAheadToken().type != FROM) error("Expected word 'from'.");
     	move();
         map<string, string> fromList = from_list();
-        View view = views[viewIndex[name]];
+        View &view = views[viewIndex[name]];
         for (map<string, pair<string, string> >::iterator iter = selectList.begin(); iter != selectList.end(); ++iter) {
             view.createColumn(iter->first);
             pair<string, string> column = iter->second;
-            View &fromView = views[viewIndex[column.first]];
+            string realName = fromList[column.first];
+            View &fromView = views[viewIndex[realName]];
+            cout << realName << endl;
             cout << column.first << endl;
-            vector<Token> col = fromView.getColByName(column.second);
             cout << column.second << endl;
+            vector<Token> col = fromView.getColByName(column.second);
             for (int j = 0; j < col.size(); ++j) {
                 view.insert(iter->first, col[j]);
             }

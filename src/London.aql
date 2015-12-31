@@ -38,11 +38,7 @@ output view OneFamous;
 output view TwoFamous;
 
 create view Famous as
-    select (<One.FamousPlace>) (<Two.FamousPlace>) (<Three.FamousPlace>)
-        return group 0 as TheFamousPlace and
-               group 1 as OneFamousPlace and
-               group 2 as TwoFamousPlace and
-               group 3 as ThreeFamousPlace
-        from OneFamous One, TwoFamous Tow, ThreeFamous Three;
+    select One.FamousPlace as OneFamousPlace, One.CapWord1 as Word
+    from OneFamous One;
 
 output view Famous;

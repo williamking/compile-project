@@ -30,8 +30,8 @@ create view PerLoc as
   from Per P, Loc L;
 
 create view PerLocOnly as
-  select PL.PerLoc as PerLoc
-  from PerLoc PL;
+  select PL.PerLoc as PerLoc, P.Per as PH
+  from PerLoc PL, Per P;
 
 output view Cap;
 output view Stt;
