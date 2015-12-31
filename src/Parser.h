@@ -90,11 +90,11 @@ class Parser {
     }
     //创建View的语句,创建一条新View
     void view_stmt(string name) {
-        //if (lexer.getAheadToken().type == SELECT) {
-        //    move();
-        //    select_stmt(name);
-        //    return; 
-        //}
+        if (lexer.getAheadToken().type == SELECT) {
+            move();
+            select_stmt(name);
+            return; 
+        }
         //cout << lexer.getAheadToken().content << endl;
         if (lexer.getAheadToken().type == EXTRACT) {
             move();
@@ -103,14 +103,64 @@ class Parser {
         }
         error("You should use key word 'select or 'extract' to deal with a view.");
     }
-    map<string, string> alias();
+    string alias() {
+        if (lexer.getAheadToken().type == AS) {
+            move();
+            if (lexer.getAheadToken().type != ID) error("Expected the colname of the view you want to create");
+            string name = lexer.getAheadToken().content;
+            move();
+            return name;
+        } else {
+            return "";
+        }
+    }
     //返回View和其别名的绑定
-    void select_stmt(string name);
+    void select_stmt(string name) {
+    	map<string, pair<string, string> > selectList = select_list();
+    	if (lexer.getAheadToken().type != FROM) error("Expected word 'from'.");
+    	move();
+        map<string, string> fromList = from_list();
+        View view = views[viewIndex[name]];
+        for (map<string, pair<string, string> >::iterator iter = selectList.begin(); iter != selectList.end(); ++iter) {
+            view.createColumn(iter->first);
+            pair<string, string> column = iter->second;
+            View &fromView = views[viewIndex[column.first]];
+            cout << column.first << endl;
+            vector<Token> col = fromView.getColByName(column.second);
+            cout << column.second << endl;
+            for (int j = 0; j < col.size(); ++j) {
+                view.insert(iter->first, col[j]);
+            }
+    	}
+    }
     //从已有的View中选择列插入到创建的新View中(参数为操作的View的名称)
-    map< string, pair<string,string> > select_list();
+    map< string, pair<string, string> > select_list() {
+        if (lexer.getAheadToken().type != ID) error("Expected a name of a view.");
+        bool cont = true;
+        map<string, pair<string, string> > results;
+        do {
+            results.insert(select_item());
+            if (lexer.getAheadToken().type != COMMA) cont = false;
+            else move();
+        } while (cont);
+        return results;
+    }
     //返回要组成新View的内容的多个列和其别名组成的map
     //map的key为选择的列并入到新View中的列名,value为选择的View别名和其列名组成的pair
-    pair< string, pair<string, string> > select_item();
+    pair< string, pair<string, string> > select_item() {
+        if (lexer.getAheadToken().type != ID) error("Expected a name of a view.");
+        string viewName = lexer.getAheadToken().content;
+        move();
+        if (lexer.getAheadToken().type != DOT) error("Expected a name of a view.");
+        move();
+        if (lexer.getAheadToken().type != ID) error("Expected a name of a view.");
+        string colName = lexer.getAheadToken().content;
+        cout << "col: " << colName << endl;
+        move();
+        string newColName = alias();
+        if (newColName == "") newColName = colName;
+        return make_pair(newColName, make_pair(viewName, colName));
+    }
     //返回select_list中map的一个value
     map<string, string> from_list() {
         map <string, string> results;
@@ -387,6 +437,11 @@ class Parser {
         }
         string view_name = lexer.getAheadToken().content;
         move();
+        if (lexer.getAheadToken().type == AS) {
+        	move();
+        	if (lexer.getAheadToken().type != ID) error("Expected an ID.");
+        	move();
+        }
         if (lexer.getAheadToken().type == SEMICOLON) {
         } else {
             error("No SEMICOLON';' Found.");
