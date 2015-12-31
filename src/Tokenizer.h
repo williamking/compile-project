@@ -107,7 +107,7 @@ public:
     }
     
     Token getTextToken() {
-        while (peek == ' ' || peek == '\n') {
+        while (peek == ' ' || peek == '\n' || peek == '\t') {
             readch();
         }
         int pos = current - 1;
@@ -121,13 +121,14 @@ public:
              std::string s = "";
             do {
                 s.append(1u, peek); readch();
-            } while (!(isdigit(peek)) && peek != ' ' && peek != '\n');
+            } while (!(isdigit(peek)) && peek != ' ' && peek != '\n' && peek != '\t');
             return Token(s, ID, 0, 0, pos);           
         }
     }
 
     Token getToken() {
-        while (peek == ' ' || peek == '\n') {
+        //cout << peek << endl;
+        while (peek == ' ' || peek == '\n' || peek == '\t') {
             readch();
         }
 
@@ -145,6 +146,7 @@ public:
             if (peek == '\n') {
                 tok_row = row - 1;
             }
+            //cout << s << endl;
             if (s == "create") return Token(s, CREATE, tok_row, tok_col, pos);
             if (s == "view") return Token(s, VIEW, tok_row, tok_col, pos);
             if (s == "as") return Token(s, AS, tok_row, tok_col, pos);
@@ -199,7 +201,7 @@ public:
     // public Token makeToken(String str, TYPE type);
     //将当前提取的token字符串包装成真正的Token(词法分析使用)
     bool isEnd() {
-        while (peek == ' ' || peek == '\n') {
+        while (peek == ' ' || peek == '\n' || peek == '\t') {
             readch();
         }
         return tokenString.size() <= current;

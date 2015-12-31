@@ -242,11 +242,14 @@ class PatternMatcher {
             for (i = 0; i < document.size() - bot; ++i) {
                 if (document[i].position >= pos && pos != -1) {
                 	from = document[i].position;
+                	break;
                 }
                 if (pos == -1) {
                     from = document[i].position;
+                    break;
                 }
-                if (from != -1) {
+            }
+                if (from != -1 && i != document.size() - bot) {
                     if (start == -1) {
                         for (int k = bot; k <= top; ++k) {
                             if (i + k >= document.size()) break;
@@ -267,7 +270,6 @@ class PatternMatcher {
                         }
                     }
                 }
-            }
             return;
         }   
         if (atoms[stackIndex][j].type == 3) {

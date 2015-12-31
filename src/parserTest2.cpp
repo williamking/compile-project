@@ -8,8 +8,8 @@ using namespace std;
 int main() {
 	//cout << "Input the AQL file name and the Article filename" << endl;
 	string aql, art;
-    aql = "London.aql";
-	art = "data/NewYork.txt";
+    aql = "Revenue.aql";
+	art = "data/Revenue.input";
 	//aql = "test.aql";
 	//art = "test.txt";
 	Parser parser(aql, art);

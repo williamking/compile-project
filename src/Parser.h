@@ -23,7 +23,7 @@ class Parser {
     Lexer lexer;
 
     void error(string errInfo = "") {
-        cout << "Error: " << errInfo << " on row:" << lexer.getAheadToken().row << " col:" << lexer.getAheadToken().col << endl;
+        cout << "Error on row " << lexer.getAheadToken().row << " col " << lexer.getAheadToken().col << ":" << errInfo << endl;
         exit(0);
     }
     
@@ -85,6 +85,7 @@ class Parser {
         move();
         if (lexer.getAheadToken().type != AS) error("Lack key word of 'AS'");
         move();
+        //cout << lexer.getAheadToken().content << endl;
         view_stmt(name);
     }
     //创建View的语句,创建一条新View
@@ -94,6 +95,7 @@ class Parser {
         //    select_stmt(name);
         //    return; 
         //}
+        //cout << lexer.getAheadToken().content << endl;
         if (lexer.getAheadToken().type == EXTRACT) {
             move();
             extract_stmt(name);
@@ -216,6 +218,7 @@ class Parser {
         //regexp = regexp.substr(p, q-p+1);
         move();
         if (lexer.getAheadToken().type != ON) {
+            cout << lexer.getAheadToken().content << endl;
             error("Expected word 'on'.");
             return;
         } 

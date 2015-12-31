@@ -3,6 +3,13 @@
 组长:朱术煌
 组员：王嘉威 周吉昊 朱希冉
 
+分工：
+朱术煌：Toknizer类的编写，数据集的收集
+王嘉威: Parser的类中regex 和 pattern 部分(PatternMatcher类)的编写
+周吉昊: Lexer类,View类的编写以及Parser类中output部分的编写
+朱希冉: Parser类中select部分的编写（？？？？）
+
+
 运行环境:linux操作系统
 
 运行方法：
@@ -12,3 +19,4 @@
 注意：
 1) AQL中的保留字都为小写。
 2) 若捕获的结果为 ""，输出会显示empty。
+3) AQL文件中token以空格换行或制表符隔开，ID只包含数字和字母，以字母开头, 文章的token也以空格换行制表符作为分词依据。
